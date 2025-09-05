@@ -1,0 +1,12 @@
+{
+  "0xV001": {
+    "vault_value_usd": 100000000,
+    "profit_amount": 100000,
+    "negative": false,
+    "expire_time": 9999999999,
+    "last_credit_time": 1720000000,
+    "signer_publickey": "aabbccddeeff00112233",
+    "signature": "ffeeddccbbaa00112233"
+  }
+}
+

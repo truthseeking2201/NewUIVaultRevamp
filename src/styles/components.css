@@ -1,0 +1,126 @@
+@layer components {
+  /* Deposit button styling */
+  .deposit-gradient-btn {
+    @apply bg-gradient-brand text-white transition-all duration-300 hover:shadow-brand;
+  }
+
+  /* Card styling */
+  .deposit-card {
+    @apply bg-white/[0.02] border border-white/[0.08] rounded-xl transition-all duration-300;
+  }
+
+  /* Wallet address display */
+  .wallet-address {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: rgba(11, 12, 16, 0.7);
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    cursor: pointer;
+    position: relative;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  .wallet-address:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    background: rgba(11, 12, 16, 0.8);
+  }
+
+  .wallet-address-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  /* Activity section styling */
+  .activity-item {
+    @apply flex items-center gap-3 py-3 px-4 rounded-xl transition-all duration-300;
+    @apply bg-white/[0.02] hover:bg-white/[0.04];
+    @apply border border-white/[0.05] hover:border-white/[0.1];
+    @apply backdrop-blur-md;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .activity-item::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    opacity: 0;
+    transition: opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  .activity-item:hover::after {
+    opacity: 1;
+  }
+
+  /* AI glow effects */
+  .ai-glow {
+    position: relative;
+  }
+
+  .ai-glow::after {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    background: radial-gradient(
+      circle closest-side,
+      rgba(236, 111, 5, 0.18),
+      transparent
+    );
+    z-index: -1;
+    border-radius: 50%;
+    filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  .ai-glow:hover::after {
+    opacity: 1;
+  }
+
+  /* Colored glows */
+  .violet-glow {
+    box-shadow: 0 0 20px rgba(62, 22, 114, 0.18);
+  }
+
+  .orange-glow {
+    box-shadow: 0 0 20px rgba(236, 111, 5, 0.18);
+  }
+
+  /* 3D effect for cards */
+  .card-3d {
+    transform: perspective(1000px) rotateX(0) rotateY(0);
+    transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  .card-3d:hover {
+    transform: perspective(1000px) rotateX(2deg) rotateY(-2deg);
+  }
+
+  /* Standard focus styles - consistent across all interactive elements */
+  /* .focus-ring {
+    @apply outline-none;
+  }
+
+  .focus-ring:focus-visible {
+    @apply outline-none ring-2 ring-brand-500/60 ring-offset-2 ring-offset-background;
+  } */
+}

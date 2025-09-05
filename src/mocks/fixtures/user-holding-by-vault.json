@@ -1,0 +1,25 @@
+{
+  "0xV001": {
+    "vault_id": "0xV001",
+    "user_wallet": "0xFAKEDEADBEEF",
+    "code": "ABC",
+    "timestamp": "2024-01-01T00:00:00Z",
+    "user_ndlp_balance": 1000,
+    "ndlp_price": "1.02",
+    "ndlp_price_usd": "1.02",
+    "user_total_liquidity_usd": 1020,
+    "user_total_rewards_usd": 12,
+    "user_total_deposit": 1000,
+    "user_total_deposit_usd": 1000,
+    "user_rewards_24h_usd": 1,
+    "user_shares_percent": 0.05,
+    "user_break_event_price": 1.0,
+    "user_break_event_price_usd": 1.0,
+    "user_total_withdraw_usd": 0,
+    "user_vault_tokens": [
+      { "token": "USDC", "amount": 1000, "amount_in_usd": 1000, "token_name": "USDC", "token_symbol": "USDC" },
+      { "token": "SUI", "amount": 5, "amount_in_usd": 20, "token_name": "SUI", "token_symbol": "SUI" }
+    ],
+    "user_vault_rewards": []
+  }
+}

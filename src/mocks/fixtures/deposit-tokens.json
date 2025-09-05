@@ -1,0 +1,25 @@
+[
+  {
+    "token_id": 1,
+    "token_symbol": "USDC",
+    "token_name": "USDC",
+    "token_address": "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
+    "decimal": 6,
+    "url": "",
+    "exchange_id": 1,
+    "min_deposit_amount": "1000000",
+    "max_deposit_amount": "1000000000000"
+  },
+  {
+    "token_id": 2,
+    "token_symbol": "SUI",
+    "token_name": "SUI",
+    "token_address": "0x0000000000000000000000000000000000000000000000000000000000000002::sui::SUI",
+    "decimal": 9,
+    "url": "",
+    "exchange_id": 1,
+    "min_deposit_amount": "1000",
+    "max_deposit_amount": "1000000000000"
+  }
+]
+

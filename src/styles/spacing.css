@@ -1,0 +1,124 @@
+/* Spacing standardization */
+
+@layer components {
+  /* Card padding */
+  .card-padding {
+    @apply p-6;
+  }
+
+  .card-padding-compact {
+    @apply p-4;
+  }
+
+  /* Card header */
+  .card-header {
+    @apply px-6 pt-6 pb-4;
+  }
+
+  .card-header-compact {
+    @apply px-4 pt-4 pb-3;
+  }
+
+  /* Card footer */
+  .card-footer {
+    @apply px-6 py-4 border-t border-white/10;
+  }
+
+  .card-footer-compact {
+    @apply px-4 py-3 border-t border-white/10;
+  }
+
+  /* Card content */
+  .card-content {
+    @apply px-6 py-4;
+  }
+
+  .card-content-compact {
+    @apply px-4 py-3;
+  }
+
+  /* Section spacing */
+  .section-spacing {
+    @apply py-12;
+  }
+
+  .section-spacing-compact {
+    @apply py-8;
+  }
+
+  /* Component spacing */
+  .component-spacing {
+    @apply space-y-6;
+  }
+
+  .component-spacing-compact {
+    @apply space-y-4;
+  }
+
+  /* Form spacing */
+  .form-group {
+    @apply space-y-2 mb-6;
+  }
+
+  .form-group-compact {
+    @apply space-y-1 mb-4;
+  }
+
+  /* Page container */
+  .page-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
+  }
+
+  /* Flex layouts */
+  .flex-row-space {
+    @apply flex flex-row items-center justify-between gap-4;
+  }
+
+  .flex-col-space {
+    @apply flex flex-col gap-4;
+  }
+
+  /* Grid layouts */
+  .grid-layout-2 {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-6;
+  }
+
+  .grid-layout-3 {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+
+  .grid-layout-4 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6;
+  }
+
+  /* Element spacing */
+  .element-spacing {
+    @apply space-x-2;
+  }
+
+  .element-spacing-vertical {
+    @apply space-y-2;
+  }
+
+  /* Standard margins */
+  .margin-bottom-standard {
+    @apply mb-6;
+  }
+
+  .margin-top-standard {
+    @apply mt-6;
+  }
+
+  /* Standard paddings */
+  .padding-standard {
+    @apply p-4;
+  }
+
+  .padding-x-standard {
+    @apply px-4;
+  }
+
+  .padding-y-standard {
+    @apply py-4;
+  }
+}

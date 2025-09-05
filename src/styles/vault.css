@@ -1,0 +1,90 @@
+
+@layer components {
+  .risk-moderate {
+    @apply bg-orion-500/30 text-orion-500;
+  }
+
+  .risk-low {
+    @apply bg-emerald-500/30 text-emerald-500;
+  }
+
+  .risk-high {
+    @apply bg-red-500/30 text-red-500;
+  }
+
+  .card-risk-pill {
+    @apply text-[11px] font-medium py-0.5 px-2.5 rounded-full backdrop-blur-sm;
+  }
+
+  .text-shadow-brand {
+    text-shadow: 0 0 6px rgba(236, 111, 5, 0.25);
+  }
+
+  .vault-chart {
+    @apply pb-4;
+  }
+
+  .activity-item {
+    @apply flex items-center gap-3 py-3 px-4 rounded-xl transition-all duration-300;
+    @apply bg-white/[0.02] hover:bg-white/[0.04];
+    @apply border border-white/[0.05] hover:border-white/[0.1];
+    @apply backdrop-blur-sm;
+  }
+
+  .vault-card {
+    @apply relative overflow-hidden rounded-[24px] transition-all duration-300;
+    @apply border border-white/[0.08] bg-white/[0.04];
+    @apply hover:translate-y-[-4px] hover:shadow-[0_8px_24px_-6px_rgba(0,0,0,0.45)];
+    @apply backdrop-blur-glass;
+  }
+
+  .vault-metrics {
+    @apply grid grid-cols-3 gap-4 py-4 px-6 border-t border-white/[0.08];
+  }
+
+  .vault-metric-label {
+    @apply text-[13px] text-white/60 font-medium mb-1;
+  }
+
+  .vault-metric-value {
+    @apply font-mono font-semibold text-2xl text-white/95 tabular-nums;
+  }
+
+  .vault-delta {
+    @apply text-sm font-mono text-emerald;
+  }
+  
+  /* AI activity styling */
+  .ai-activity-badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium;
+    @apply bg-brand-500/10 text-brand-500 border border-brand-500/20;
+    @apply backdrop-blur-sm;
+  }
+  
+  .ai-activity-indicator {
+    position: relative;
+  }
+  
+  .ai-activity-indicator::before {
+    content: '';
+    @apply absolute -top-0.5 -right-0.5 w-2 h-2 bg-brand-500 rounded-full;
+    animation: pulse 2s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+  }
+  
+  /* Glassy stats card */
+  .stats-card {
+    @apply rounded-2xl bg-white/5 backdrop-blur-glass;
+    @apply border border-white/8 hover:border-white/15;
+    @apply transition-all duration-300;
+    @apply relative overflow-hidden;
+    @apply shadow-glass;
+  }
+  
+  .stats-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+  }
+}

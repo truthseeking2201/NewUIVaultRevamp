@@ -1,0 +1,245 @@
+/* AI and Web3 Visual Styles */
+
+/* Neural Network Line Animation */
+.neural-line {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(249, 115, 22, 0.7), transparent);
+  animation: pulse 3s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+/* Glowing effects */
+.glow-nova {
+  box-shadow: 0 0 15px rgba(249, 115, 22, 0.3);
+}
+
+.glow-orion {
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+}
+
+.glow-emerald {
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+}
+
+/* Text glow shadows */
+.drop-shadow-glow {
+  filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.5));
+}
+
+.drop-shadow-glow-green {
+  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.5));
+}
+
+.drop-shadow-glow-amber {
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.5));
+}
+
+.drop-shadow-glow-red {
+  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.5));
+}
+
+/* Neural network nodes */
+.neural-node {
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.8);
+  animation: nodeGlow 4s infinite;
+}
+
+@keyframes nodeGlow {
+  0%, 100% { box-shadow: 0 0 5px rgba(249, 115, 22, 0.5); transform: scale(1); }
+  50% { box-shadow: 0 0 10px rgba(249, 115, 22, 0.8); transform: scale(1.2); }
+}
+
+/* Data flow animations */
+.data-flow {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: rgba(249, 115, 22, 0.8);
+  animation: dataFlow 3s linear infinite;
+}
+
+@keyframes dataFlow {
+  0% { transform: translate(0, 0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translate(var(--endX, 100px), var(--endY, 100px)); opacity: 0; }
+}
+
+/* AI Text typing animation */
+.ai-typing::after {
+  content: "|";
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Gradient background with animated noise */
+.animated-gradient-bg {
+  background: linear-gradient(45deg, #0a0c10, #121420, #1a1c25);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+  position: relative;
+}
+
+.animated-gradient-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Neural network connections */
+.neural-connection {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(249, 115, 22, 0.3), transparent);
+  transform-origin: left center;
+  opacity: 0.3;
+}
+
+/* Glowing borders */
+.glow-border {
+  position: relative;
+}
+
+.glow-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(45deg, rgba(249, 115, 22, 0.5), rgba(245, 158, 11, 0.5), rgba(16, 185, 129, 0.5));
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.glow-border:hover::before {
+  opacity: 1;
+}
+
+/* Text gradient animations */
+.gradient-text {
+  background: linear-gradient(90deg, #F97316, #FF8A00, #F59E0B);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: textGradient 4s linear infinite;
+}
+
+@keyframes textGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Data processing effect */
+.processing-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.processing-effect::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(249, 115, 22, 0.2),
+    transparent
+  );
+  animation: processing 2s infinite;
+}
+
+@keyframes processing {
+  0% { left: -100%; }
+  50%, 100% { left: 100%; }
+}
+
+/* Neural pulse animation for active states */
+.neural-pulse {
+  position: relative;
+}
+
+.neural-pulse::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 1px solid rgba(249, 115, 22, 0.5);
+  opacity: 0;
+  z-index: -1;
+}
+
+.neural-pulse.active::after {
+  animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { opacity: 0.5; }
+  100% { transform: scale(1.2); opacity: 0; }
+}
+
+/* CPU/GPU processing visualizer */
+.ai-processor {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols, 8), 1fr);
+  grid-template-rows: repeat(var(--grid-rows, 8), 1fr);
+  gap: 2px;
+}
+
+.ai-processor-cell {
+  aspect-ratio: 1/1;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 2px;
+  transition: background-color 0.2s ease;
+}
+
+.ai-processor-cell.active {
+  background-color: rgba(249, 115, 22, 0.7);
+}
+
+/* Hover effect for interactive elements */
+.ai-hover-effect {
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.ai-hover-effect:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+/* Blur effect for layered UI */
+.neural-blur {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}

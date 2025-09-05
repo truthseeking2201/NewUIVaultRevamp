@@ -1,0 +1,1 @@
+export type TimeFilter = "D" | "W";

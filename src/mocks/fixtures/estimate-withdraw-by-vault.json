@@ -1,0 +1,11 @@
+{
+  "0xV001": {
+    "estimated_payout_amount": "980000",
+    "collateral_amount": "980000",
+    "ndlp_per_payout_rate": 1.01,
+    "ndlp_rate": 1
+  },
+  "0xV002": { "estimated_payout_amount": "990000", "collateral_amount": "990000", "ndlp_per_payout_rate": 1.0, "ndlp_rate": 1 },
+  "0xV003": { "estimated_payout_amount": "1020000", "collateral_amount": "1020000", "ndlp_per_payout_rate": 0.99, "ndlp_rate": 1 },
+  "0xV004": { "estimated_payout_amount": "1000000", "collateral_amount": "1000000", "ndlp_per_payout_rate": 1.0, "ndlp_rate": 1 }
+}

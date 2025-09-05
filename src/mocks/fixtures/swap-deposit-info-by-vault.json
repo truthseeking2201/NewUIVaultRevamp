@@ -1,0 +1,59 @@
+{
+  "0xV001": {
+    "vault_package_id": "0xPKG",
+    "vault_config": "0xCFG",
+    "vault_id": "0xV001",
+    "vault_collateral_token": "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
+    "vault_lp_token": "0xNDLP::ndlp::NDLP",
+    "pool_address": "0xPOOL",
+    "pool_token_a_type": "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
+    "pool_token_b_type": "0x0000000000000000000000000000000000000000000000000000000000000002::sui::SUI",
+    "vault_package_module": "bluefin_adapter",
+    "vault_package_function": "deposit",
+    "global_config": "0xGLOBAL",
+    "version": "1"
+  }
+  ,
+  "0xV002": {
+    "vault_package_id": "0xPKG",
+    "vault_config": "0xCFG2",
+    "vault_id": "0xV002",
+    "vault_collateral_token": "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
+    "vault_lp_token": "0xNDLP::ndlp::NDLP",
+    "pool_address": "0xPOOL2",
+    "pool_token_a_type": "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
+    "pool_token_b_type": "0x0000000000000000000000000000000000000000000000000000000000000002::sui::SUI",
+    "vault_package_module": "bluefin_adapter",
+    "vault_package_function": "deposit",
+    "global_config": "0xGLOBAL",
+    "version": "1"
+  },
+  "0xV003": {
+    "vault_package_id": "0xPKG",
+    "vault_config": "0xCFG3",
+    "vault_id": "0xV003",
+    "vault_collateral_token": "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
+    "vault_lp_token": "0xNDLP::ndlp::NDLP",
+    "pool_address": "0xPOOL3",
+    "pool_token_a_type": "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
+    "pool_token_b_type": "0x0000000000000000000000000000000000000000000000000000000000000002::sui::SUI",
+    "vault_package_module": "mmt_adapter",
+    "vault_package_function": "deposit",
+    "global_config": "0xGLOBAL",
+    "version": "1"
+  },
+  "0xV004": {
+    "vault_package_id": "0xPKG",
+    "vault_config": "0xCFG4",
+    "vault_id": "0xV004",
+    "vault_collateral_token": "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
+    "vault_lp_token": "0xNDLP::ndlp::NDLP",
+    "pool_address": "0xPOOL4",
+    "pool_token_a_type": "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
+    "pool_token_b_type": "0x0000000000000000000000000000000000000000000000000000000000000002::sui::SUI",
+    "vault_package_module": "cetus_adapter",
+    "vault_package_function": "deposit",
+    "global_config": "0xGLOBAL",
+    "version": "1"
+  }
+}

@@ -1,0 +1,9 @@
+export { default as ArrowDown } from "./arrow-down.svg?react";
+export { default as Swap } from "./swap.svg?react";
+export { default as Telegram } from "./telegram.svg?react";
+export { default as X } from "./x.svg?react";
+export { default as Vault } from "./vault.svg?react";
+export { default as Copy } from "./copy-gradient.svg?react";
+export { default as ArrowDecreasing } from "./arrow-decreasing.svg?react";
+export { default as ArrowIncreasing } from "./arrow-increasing.svg?react";
+export { default as ArrowRightContained } from "./arrow-right-contained.svg?react";

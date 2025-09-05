@@ -1,0 +1,23 @@
+
+/* Design tokens - the foundation of our design system */
+@import './styles/design-tokens.css';
+
+/* Base styles need to be imported first */
+@import './styles/base.css';
+
+/* Then typography and spacing */
+@import './styles/typography.css';
+@import './styles/spacing.css';
+
+/* Then component styles */
+@import './styles/components.css';
+@import './styles/animations.css';
+@import './styles/noise-pattern.css';
+
+/* Then specific styles */
+@import './styles/vault.css';
+@import './styles/dashboard.css';
+@import './styles/ai-web3.css';
+
+/* Theme styles should be last as they can override other styles */
+@import './styles/theme.css';

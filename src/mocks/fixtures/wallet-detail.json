@@ -1,0 +1,18 @@
+{
+  "email": null,
+  "status": "APPROVED",
+  "wallet_provider": "MockWallet",
+  "wallet_address": "0xFAKEDEADBEEF",
+  "timestamp": "2025-06-11T11:02:51.151Z",
+  "metadata": null,
+  "invite_code": {
+    "nodo_account": {
+      "code": "ABCDEF",
+      "email": "someone@example.com",
+      "user_id": "u1",
+      "full_name": "Mock User",
+      "wallet_address": "0xFAKEDEADBEEF"
+    }
+  }
+}
+

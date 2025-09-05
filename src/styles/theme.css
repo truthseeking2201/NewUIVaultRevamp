@@ -1,0 +1,63 @@
+/* Theme CSS file - Contains only styles that reference variables from base.css */
+
+/* Apply the dark background to the entire app */
+body {
+  background-color: var(--background-color);
+  color: var(--text-primary);
+}
+
+/* Updated glass-card styling */
+.glass-card {
+  background-color: var(--card-background);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* CTA Button styling with Nova gradient */
+.cta-button {
+  background: var(--cta-gradient);
+  color: #ffffff;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.cta-button:hover {
+  background: var(--cta-hover-gradient);
+  box-shadow: 0 0 12px rgba(255, 138, 0, 0.4);
+}
+
+/* Glow effect for AI elements */
+.ai-glow {
+  box-shadow: 0 0 10px rgba(255, 138, 0, 0.3);
+  transition: box-shadow 0.3s ease;
+}
+
+.ai-glow:hover {
+  box-shadow: 0 0 15px rgba(255, 138, 0, 0.5);
+}
+
+/* Neural orange text gradient */
+.text-gradient-nova {
+  background: var(--cta-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
+/* Update all previous .gradient-bg-nova classes to use the consistent CTA gradient */
+.gradient-bg-nova {
+  background: var(--cta-gradient);
+}
+
+/* Micro animations for AI interactions */
+@keyframes pulse-orange {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.pulse-ai {
+  animation: pulse-orange 2s infinite ease-in-out;
+}

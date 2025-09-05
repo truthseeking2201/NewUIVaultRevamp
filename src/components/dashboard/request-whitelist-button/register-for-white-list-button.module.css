@@ -1,0 +1,72 @@
+/* ---------- COMPONENT STYLES ---------- */
+.buttonWrapper {
+  position: relative;
+  width: 100%;
+  height: 52px;
+}
+
+.whitelistButton {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 52px;
+  padding: 0 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: none;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  color: #000000;
+  cursor: pointer;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.arrowIcon {
+  transition: transform 0.3s ease;
+}
+
+.blurEffect {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 59.992px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: linear-gradient(
+    90deg,
+    #fff -3.93%,
+    #0090ff 22.06%,
+    #ff6d9c 48.04%,
+    #fb7e16 74.02%,
+    #fff 100%
+  );
+  filter: blur(9px);
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+/* -------- Hover effects -------- */
+.buttonWrapper:hover .whitelistButton {
+  transform: translate(-50%, -50%) scale(1.02);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.buttonWrapper:hover .arrowIcon {
+  transform: translateX(3px);
+}
+
+.buttonWrapper:hover .blurEffect {
+  transform: translate(-50%, -50%) scale(1.02);
+  filter: blur(12px);
+  opacity: 0.95;
+}

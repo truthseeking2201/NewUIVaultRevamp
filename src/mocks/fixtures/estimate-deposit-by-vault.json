@@ -1,0 +1,11 @@
+{
+  "0xV001": {
+    "estimated_ndlp": "990000",
+    "collateral_amount": "1000000",
+    "ndlp_per_deposit_rate": 0.99,
+    "ndlp_rate": 1
+  },
+  "0xV002": { "estimated_ndlp": "995000", "collateral_amount": "1000000", "ndlp_per_deposit_rate": 0.995, "ndlp_rate": 1 },
+  "0xV003": { "estimated_ndlp": "1010000", "collateral_amount": "1000000", "ndlp_per_deposit_rate": 1.01, "ndlp_rate": 1 },
+  "0xV004": { "estimated_ndlp": "1000000", "collateral_amount": "1000000", "ndlp_per_deposit_rate": 1.0, "ndlp_rate": 1 }
+}

@@ -1,0 +1,6 @@
+[
+  { "vault_id": "0xV001", "ndlp_price": "1.02", "ndlp_price_usd": "1.02" },
+  { "vault_id": "0xV002", "ndlp_price": "1.01", "ndlp_price_usd": "1.01" },
+  { "vault_id": "0xV003", "ndlp_price": "1.05", "ndlp_price_usd": "1.05" },
+  { "vault_id": "0xV004", "ndlp_price": "1.00", "ndlp_price_usd": "1.00" }
+]

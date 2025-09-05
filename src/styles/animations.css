@@ -1,0 +1,382 @@
+/* Standardized animation durations:
+   - Micro interactions: 0.2s
+   - UI transitions: 0.3s
+   - Emphasis animations: 0.5s
+   - Background effects: 1-3s
+
+   Standard easing: cubic-bezier(0.25, 0.1, 0.25, 1) (standard ease-out)
+*/
+
+/* Spinner animation */
+@keyframes slow-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-slow-spin {
+  animation: slow-spin 4s linear infinite;
+}
+
+/* Pulsing effect */
+@keyframes pulse {
+  0% {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+/* Glowing text effects - standardized for different colors */
+@keyframes glow {
+  0% {
+    filter: drop-shadow(0 0 4px rgba(var(--glow-color, 236, 111, 5), 0.2));
+  }
+  50% {
+    filter: drop-shadow(0 0 10px rgba(var(--glow-color, 236, 111, 5), 0.5));
+  }
+  100% {
+    filter: drop-shadow(0 0 4px rgba(var(--glow-color, 236, 111, 5), 0.2));
+  }
+}
+
+.text-glow-emerald {
+  --glow-color: 16, 185, 129;
+  animation: glow 3s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+.text-glow-nova {
+  --glow-color: 236, 111, 5;
+  animation: glow 3s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+.text-glow-orion {
+  --glow-color: 245, 158, 11;
+  animation: glow 3s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+/* Box shadow glow effects */
+@keyframes box-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(var(--glow-color, 236, 111, 5), 0.18);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(var(--glow-color, 236, 111, 5), 0.3);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(var(--glow-color, 236, 111, 5), 0.18);
+  }
+}
+
+.brand-glow {
+  --glow-color: 236, 111, 5;
+  animation: box-glow 3s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+.emerald-glow {
+  --glow-color: 16, 185, 129;
+  animation: box-glow 3s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+.orion-glow {
+  --glow-color: 245, 158, 11;
+  animation: box-glow 3s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+/* AI working animation */
+@keyframes ai-working {
+  0% {
+    opacity: 0.3;
+    transform: translateX(-100%);
+  }
+  100% {
+    opacity: 0.7;
+    transform: translateX(100%);
+  }
+}
+
+.ai-working-indicator {
+  position: relative;
+  overflow: hidden;
+}
+
+.ai-working-indicator::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(236, 111, 5, 0.5),
+    transparent
+  );
+  animation: ai-working 2s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+/* Floating animation */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-float {
+  animation: float 4s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+/* Particle effect */
+@keyframes particle {
+  0% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--x, 20px), var(--y, -20px));
+    opacity: 0;
+  }
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: rgba(236, 111, 5, 0.6);
+  animation: particle 1.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+/* 3D transform effect for cards */
+.transform-3d {
+  transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+    box-shadow 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.transform-3d:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* Standardized fade animations */
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+.animate-fade-out {
+  animation: fade-out 0.3s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+/* Instant success animation */
+@keyframes instant-success {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-instant-success {
+  animation: instant-success 0.3s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+/* Card success glow animation */
+@keyframes card-glow {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(236, 111, 5, 0);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(236, 111, 5, 0.6);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(236, 111, 5, 0);
+  }
+}
+
+.glow-animation {
+  animation: card-glow 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow-animation,
+  .animate-spin-once {
+    animation: none;
+  }
+}
+
+/* Spin animation that runs just once */
+@keyframes spin-once {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-once {
+  animation: spin-once 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+/* Subtle parallax effect */
+.parallax {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.parallax-layer {
+  transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.parallax:hover .parallax-layer--1 {
+  transform: translateZ(10px);
+}
+
+.parallax:hover .parallax-layer--2 {
+  transform: translateZ(20px);
+}
+
+/* AI neural glow effects */
+@keyframes neural-pulse {
+  0% {
+    box-shadow: 0 0 5px rgba(var(--neural-color, 249, 115, 22), 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(var(--neural-color, 249, 115, 22), 0.6);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(var(--neural-color, 249, 115, 22), 0.3);
+  }
+}
+
+.neural-glow-nova {
+  --neural-color: 249, 115, 22;
+  animation: neural-pulse 3s ease-in-out infinite;
+}
+
+.neural-glow-orion {
+  --neural-color: 245, 158, 11;
+  animation: neural-pulse 3s ease-in-out infinite;
+}
+
+.neural-glow-emerald {
+  --neural-color: 16, 185, 129;
+  animation: neural-pulse 3s ease-in-out infinite;
+}
+
+/* Neural network animation */
+@keyframes network-flow {
+  0% {
+    stroke-dashoffset: 1000;
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.2;
+  }
+}
+
+.network-line {
+  stroke-dasharray: 10;
+  animation: network-flow 5s linear infinite;
+}
+
+/* AI thinking animation */
+@keyframes ai-thinking {
+  0%,
+  100% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+.ai-thinking {
+  animation: ai-thinking 1.5s ease-in-out infinite;
+}
+
+@keyframes ai-hiden {
+  0%,
+  100% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+.ai-hiden {
+  animation: ai-hiden 1s ease-in-out infinite;
+}
+
+@keyframes new-glow {
+  0%,
+  100% {
+    box-shadow: -2px 0 2px rgba(255, 255, 255, 0.75) inset,
+      2px 0 2px rgba(0, 255, 251, 0.95) inset, 0 -3px 2px #07f inset,
+      0 3px 2px #b708f6 inset;
+  }
+  50% {
+    box-shadow: -2px 0 4px rgba(255, 255, 255, 1) inset,
+      2px 0 4px rgba(0, 255, 251, 1) inset, 0 -3px 4px #0ff inset,
+      0 3px 4px #f0f inset;
+  }
+}
+
+.new-glow {
+  animation: new-glow 2s infinite alternate;
+}
