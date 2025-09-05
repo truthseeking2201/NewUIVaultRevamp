@@ -82,14 +82,9 @@ const DepositInput = ({
           }
           balanceInputUsd={
             <span className="text-white/50 text-sm font-medium font-sans">
-              {currentToken
-                ? formatAmount({
-                    amount: depositAmountUsd,
-                    precision: 2,
-                    minimumDisplay: 0.01,
-                    sign: "$",
-                  })
-                : "$--"}{" "}
+              {depositAmountUsd != null
+                ? formatAmount({ amount: depositAmountUsd, precision: 2, minimumDisplay: 0.01, sign: "$" })
+                : "—"}
             </span>
           }
           rightInput={

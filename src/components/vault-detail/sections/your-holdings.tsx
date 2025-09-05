@@ -28,6 +28,7 @@ import { useLpBreakdown } from "@/hooks/use-vault";
 import { format } from "date-fns";
 import NdLpStatusChartCard from "@/components/vault-detail/sections/ndlp-status-chart-card";
 import { tokenIconPath } from "@/components/vault-detail/activities/utils";
+import { ChartTooltip } from "@/components/chart/ChartTooltip";
 
 type YourHoldingProps = {
   isDetailLoading: boolean;
@@ -954,7 +955,7 @@ export function MyPositionSection({
 
       <DetailWrapper title="Risk & Strategy State" isLoading={!!isDetailLoading} loadingStyle="h-[80px] w-full">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 text-sm">
-          <div className="lg:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="lg:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2">
             <MPStateItem label="Stop-loss State" value={`${fixture?.risk?.stopLossState ?? (vault?.is_active ? "Active" : "Inactive")}${fixture?.risk?.stopLossLastTs ? ` (last: ${format(new Date(fixture?.risk?.stopLossLastTs), 'yyyy-MM-dd HH:mm')} )` : ''}`} />
             <MPStateItem label="% In-range (24h)" value={`${fixture?.risk?.inRangePct24h ?? '—'}${fixture?.risk ? '%' : ''}`} />
             <MPStateItem label="Rebalances (24h)" value={`${fixture?.risk?.rebalances24h ?? '—'}`} />
@@ -1018,8 +1019,8 @@ function MPBreakdownItem({ label, value, hint, emphasize }: { label: string; val
 function MPStateItem({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-white/60 text-xs mb-1">{label}</div>
-      <div className="text-white font-mono">{value}</div>
+      <div className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">{label}</div>
+      <div className="text-sm font-medium tabular-nums">{value || "—"}</div>
     </div>
   );
 }
@@ -1063,21 +1064,21 @@ function EstimatedLpBreakdown({ vault_id, embedded = false }: { vault_id: string
     }
   };
 
-  // Loading state with skeleton donut + rows
+  // Loading state with skeleton donut + rows (tokens)
   if (isLoading) {
     return (
-      <div className={cn("rounded-md border border-white/10 bg-white/5", embedded ? "p-3" : "p-4")}> 
-        <div className="text-white font-semibold text-sm">Estimated LP Breakdown • Secure, updates ~1h</div>
-        <div className="text-white/60 text-xs mt-1">Secure snapshot, refreshed ~hourly</div>
-        <div className="mt-3 grid grid-cols-12 gap-3 items-center">
-          <div className="col-span-12 lg:col-span-7 space-y-2">
+      <div className={cn("rounded-lg border border-border/60 bg-card/40 px-4 py-3 md:px-5 md:py-4")}> 
+        <div className="text-sm font-semibold">Estimated LP Breakdown <span className="text-muted-foreground">• Secure, updates ~1h</span></div>
+        <div className="text-xs text-muted-foreground mt-0.5">Secure snapshot, refreshed ~hourly</div>
+        <div className="mt-3 grid md:grid-cols-[minmax(280px,1fr)_minmax(240px,0.9fr)] gap-6 items-center">
+          <div className="space-y-2">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-9 rounded bg-white/5 animate-pulse" />
+              <div key={i} className="h-9 rounded-md bg-accent/20 animate-pulse" />
             ))}
           </div>
-          <div className="col-span-12 lg:col-span-5 flex items-center justify-center">
-            <svg width="220" height="220" role="img" aria-label="loading donut" className="opacity-70">
-              <circle cx="110" cy="110" r="90" stroke="#2A2A2A" strokeWidth="14" fill="transparent" />
+          <div className="flex items-center justify-center">
+            <svg width="240" height="240" role="img" aria-label="loading donut" className="opacity-60">
+              <circle cx="120" cy="120" r="100" stroke="var(--border)" strokeWidth="13" fill="transparent" />
             </svg>
           </div>
         </div>
@@ -1087,10 +1088,10 @@ function EstimatedLpBreakdown({ vault_id, embedded = false }: { vault_id: string
 
   if (!data || !data.slices?.length) {
     return (
-      <div className={cn("rounded-md border border-white/10 bg-white/5", embedded ? "p-3" : "p-4")}> 
-        <div className="text-white font-semibold text-sm">Estimated LP Breakdown • Secure, updates ~1h</div>
-        <div className="text-white/60 text-xs mt-1">Secure snapshot, refreshed ~hourly</div>
-        <div className="text-white/60 text-sm mt-3">No breakdown available for this vault.</div>
+      <div className={cn("rounded-lg border border-border/60 bg-card/40 px-4 py-3 md:px-5 md:py-4")}> 
+        <div className="text-sm font-semibold">Estimated LP Breakdown <span className="text-muted-foreground">• Secure, updates ~1h</span></div>
+        <div className="text-xs text-muted-foreground mt-0.5">Secure snapshot, refreshed ~hourly</div>
+        <div className="text-muted-foreground text-sm mt-3">No realized fees or losses in this period.</div>
       </div>
     );
   }
@@ -1133,13 +1134,14 @@ function EstimatedLpBreakdown({ vault_id, embedded = false }: { vault_id: string
     if (!active || !payload?.length) return null;
     const s = payload[0].payload as any;
     return (
-      <div className="rounded-md border border-white/10 bg-black/80 p-2 text-xs text-white/90">
-        <div className="font-semibold">{s.label}</div>
-        <div className="font-mono mt-1">{percentText(s.percent)} • ${formatNumber(s.usd, 0, 0)}</div>
-        {s.lastChangedTs && (
-          <div className="text-white/60 mt-1">Last changed: {relativeTime(s.lastChangedTs)}</div>
-        )}
-      </div>
+      <ChartTooltip
+        title={s.label}
+        rows={[
+          { label: "Share", value: percentText(s.percent) },
+          { label: "Value", value: `$${formatNumber(s.usd, 0, 0)}` },
+          ...(s.lastChangedTs ? [{ label: "Last changed", value: relativeTime(s.lastChangedTs) }] : []),
+        ]}
+      />
     );
   };
 
@@ -1157,26 +1159,27 @@ function EstimatedLpBreakdown({ vault_id, embedded = false }: { vault_id: string
   };
 
   // Responsive donut size
-  const size = typeof window !== 'undefined' && window.innerWidth < 768 ? 180 : 260;
+  const size = typeof window !== 'undefined' && window.innerWidth < 768 ? 240 : 260;
   const cx = size / 2;
   const cy = size / 2;
   const outerR = Math.floor(size / 2) - 6; // padding from edges
-  const thickness = 14;
+  const thickness = 13;
   const innerR = outerR - thickness;
   const gap = 3;
 
   return (
-    <div className={cn("rounded-md border border-white/10 bg-white/5", embedded ? "p-3" : "p-4")}> 
-      <div className="flex flex-col">
-        <div className="text-white font-semibold text-sm">Estimated LP Breakdown • Secure, updates ~1h</div>
-        <div className="text-white/60 text-xs mt-1">Secure snapshot, refreshed ~hourly • As of {asOfWithTz(data.asOf)}</div>
-        {isDegraded ? (
-          <div className="text-[11px] text-white/50 mt-1">Showing last secure snapshot.</div>
-        ) : null}
+    <div className={cn("rounded-lg border border-border/60 bg-card/40 px-4 py-3 md:px-5 md:py-4")}> 
+      <div className="mb-2">
+        <div className="text-sm font-semibold">
+          Estimated LP Breakdown <span className="text-muted-foreground">• Secure, updates ~1h</span>
+        </div>
+        <div className="text-xs text-muted-foreground">
+          Secure snapshot, refreshed ~hourly — As of {asOfWithTz(data.asOf)}{isDegraded ? " • showing last secure snapshot" : ""}
+        </div>
       </div>
-      <div className="mt-3 grid grid-cols-12 gap-3 items-center">
-        {/* Legend (left) */}
-        <div className="col-span-12 lg:col-span-7 pr-1 overflow-auto" role="listbox" aria-label="LP breakdown legend" style={{ maxHeight: 220 }}>
+      <div className="grid md:grid-cols-[minmax(280px,1fr)_minmax(240px,0.9fr)] gap-6 items-center">
+        {/* Legend */}
+        <div className="space-y-1.5" role="listbox" aria-label="LP breakdown legend">
           {displaySlices.map((s, i) => (
             <div
               key={`${s.label}-${i}`}
@@ -1194,24 +1197,20 @@ function EstimatedLpBreakdown({ vault_id, embedded = false }: { vault_id: string
                 }
               }}
               className={cn(
-                "flex items-center justify-between gap-2 rounded px-2 h-9",
-                activeIdx === i ? "bg-white/10" : "hover:bg-white/5"
+                "grid grid-cols-[6px_24px_1fr_64px_96px] items-center gap-3 py-2 rounded-md",
+                activeIdx === i ? "bg-accent/30" : "hover:bg-accent/30"
               )}
             >
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="w-1.5 h-5 rounded" style={{ background: s.color }} />
-                <img src={tokenIconPath(s.label)} alt="" className="w-4 h-4" />
-                <span className="truncate text-sm text-white/90">{s.label}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-mono text-white/80 w-[64px] text-right">{percentText(s.percent)}</span>
-                <span className="text-sm font-mono text-white/60 w-[90px] text-right">${formatNumber(s.usd, 0, 0)}</span>
-              </div>
+              <span className="h-5 w-[6px] rounded-full" style={{ background: s.color }} />
+              <img src={tokenIconPath(s.label)} alt="" className="h-6 w-6" />
+              <div className="text-sm truncate">{s.label}</div>
+              <div className="text-sm text-right tabular-nums">{percentText(s.percent)}</div>
+              <div className="text-sm text-right tabular-nums text-muted-foreground">${formatNumber(s.usd, 0, 0)}</div>
             </div>
           ))}
         </div>
-        {/* Donut (right) */}
-        <div className="col-span-12 lg:col-span-5 flex items-center justify-center">
+        {/* Donut */}
+        <div className="flex items-center justify-center">
           <div
             className="outline-none"
             tabIndex={0}
@@ -1226,6 +1225,8 @@ function EstimatedLpBreakdown({ vault_id, embedded = false }: { vault_id: string
                 cy={cy}
                 innerRadius={innerR}
                 outerRadius={outerR}
+                startAngle={90}
+                endAngle={-270}
                 paddingAngle={gap}
                 isAnimationActive={false}
                 dataKey="percent"
@@ -1235,8 +1236,8 @@ function EstimatedLpBreakdown({ vault_id, embedded = false }: { vault_id: string
                   <Cell
                     key={idx}
                     fill={s.color}
-                    stroke={activeIdx === idx ? "#FFFFFF" : "#0f0f0f"}
-                    strokeOpacity={activeIdx === idx ? 1 : 0.5}
+                    stroke={activeIdx === idx ? "var(--foreground)" : "var(--border)"}
+                    strokeOpacity={activeIdx === idx ? 0.9 : 0.5}
                     strokeWidth={activeIdx === idx ? 2 : 1}
                     onMouseEnter={() => setHoverIdx(idx)}
                     onClick={() => setSelectedIdx(selectedIdx === idx ? null : idx)}

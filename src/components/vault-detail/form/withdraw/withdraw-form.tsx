@@ -22,7 +22,8 @@ import AmountToken from "./amount-token";
 import ConversationRate from "../conversation-rate";
 import SelectMethod from "../select-method";
 import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
-import { showFormatNumber } from "@/lib/number";
+import { showFormatNumber, isDevBalEnabled, DEV_BAL } from "@/lib/number";
+import { SymbolTokenIcon } from "@/components/shared/token-icons";
 import LpType from "@/types/lp.type";
 import PaymentTokenType from "@/types/payment-token.types";
 import {
@@ -100,14 +101,8 @@ export default function WithdrawForm({
   const rightInput = useMemo(() => {
     return (
       <div className="flex items-center">
-        <img
-          src={lpData.lp_image}
-          alt={lpData.lp_symbol}
-          className="md:w-6 md:h-6 mr-2 w-5 h-5"
-        />
-        <span className="font-mono text-sm md:text-lg font-bold text-gray-200">
-          {lpData.lp_symbol}
-        </span>
+        <SymbolTokenIcon symbol={lpData.lp_symbol} className="md:w-6 md:h-6 mr-2 w-5 h-5" />
+        <span className="font-mono text-sm md:text-lg font-bold text-gray-200">{lpData.lp_symbol}</span>
       </div>
     );
   }, [lpData]);
@@ -293,7 +288,7 @@ export default function WithdrawForm({
           render={({ field: { onChange, onBlur, value } }) => (
             <FormattedNumberInput
               value={value ? `${value}` : ""}
-              amountAvailable={balanceLp}
+              amountAvailable={isDevBalEnabled() ? String(DEV_BAL) : balanceLp}
               balanceInput={balanceInput}
               balanceInputUsd={balanceInputUsd}
               rightInput={rightInput}
@@ -323,15 +318,37 @@ export default function WithdrawForm({
               tooltipContent="Estimated amount based on current NDLP price. Final amount may vary slightly due to market conditions during processing."
             />
           </div>
-          {summary?.receives?.map((token, idx) => (
-            <AmountToken
-              key={`amount-${idx}`}
-              amount={token?.amount}
-              token={token}
-              className={idx > 0 ? "mt-2 md:mt-4" : ""}
-              isLoading={summary.isLoadingEst}
-            />
-          ))}
+          {(["degraded", "cooldown", "protective"].includes(String((import.meta as any)?.env?.NEXT_PUBLIC_DEV_STATUS)?.toLowerCase()) ? (
+            <div className="text-xs text-white/80 bg-white/5 border border-white/15 rounded-md p-3">
+              Estimates are temporarily unavailable while the network is unstable / in protective mode. Funds are safe.
+            </div>
+          ) : null)}
+
+          {!(["degraded", "cooldown", "protective"].includes(String((import.meta as any)?.env?.NEXT_PUBLIC_DEV_STATUS)?.toLowerCase())) && (
+            (() => {
+              const rec = summary?.receives || [];
+              let view = rec;
+              if (rec.length === 2) {
+                const [a, b] = rec;
+                const sa = (a?.token_symbol || '').toUpperCase();
+                const sb = (b?.token_symbol || '').toUpperCase();
+                if (sa === sb) {
+                  view = [ { ...a, token_symbol: 'SUI' }, { ...b, token_symbol: 'USDC' } ];
+                } else {
+                  view = rec.slice().sort((x, y) => (x.token_symbol === 'SUI' ? -1 : 1));
+                }
+              }
+              return view.map((token, idx) => (
+                <AmountToken
+                  key={`amount-${idx}`}
+                  amount={token?.amount}
+                  token={token}
+                  className={idx > 0 ? "mt-2 md:mt-4" : ""}
+                  isLoading={summary.isLoadingEst}
+                />
+              ));
+            })()
+          )}
 
           <hr className="w-full border-t border-white/15 my-4" />
           {method === METHOD_DEPOSIT.SINGLE && (

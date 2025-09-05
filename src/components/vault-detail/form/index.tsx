@@ -1,8 +1,8 @@
-import ConditionRenderer from "@/components/shared/condition-renderer.tsx";
+import ConditionRenderer from "@/components/shared/condition-renderer";
 import { useState } from "react";
 import DepositForm from "./deposit";
 import { FormTabs } from "./tabs";
-import WithdrawSection from "./withdraw/withdraw-vault-section.tsx";
+import WithdrawSection from "./withdraw/withdraw-vault-section";
 import { useEffect } from "react";
 import { useHasWithdrawRequest } from "@/hooks/use-withdraw-vault";
 import { useWallet } from "@/hooks";

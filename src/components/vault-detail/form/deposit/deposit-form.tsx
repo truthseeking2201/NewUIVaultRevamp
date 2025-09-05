@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTokenPrices } from "@/hooks/use-token-price";
 import { getBalanceAmountForInput, getDecimalAmount } from "@/lib/number";
 import { cn, formatAmount } from "@/lib/utils";
+import { SymbolTokenIcon } from "@/components/shared/token-icons";
 import BigNumber from "bignumber.js";
 import debounce from "lodash-es/debounce";
 import { TriangleAlert } from "lucide-react";
@@ -32,7 +33,7 @@ import DepositInput from "./deposit-input";
 import DepositModal from "./deposit-modal";
 import SlippageSetting from "./slippage-setting";
 import { useRiskDisclosure } from "@/hooks/use-risk-disclosure";
-import RiskDisclosuresPopup from "./risk-disclosure-popup.tsx";
+import RiskDisclosuresPopup from "./risk-disclosure-popup";
 
 export type DepositSuccessData = {
   digest: string;
@@ -72,6 +73,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
     "checking" | "can" | "cannot"
   >("can");
   const [slippage, setSlippage] = useState<string>("0.05");
+  const devStatusNorm = String((import.meta as any)?.env?.NEXT_PUBLIC_DEV_STATUS || '').toLowerCase();
 
   const { isMd } = useBreakpoint();
   const { toast, dismiss } = useToast();
@@ -93,8 +95,11 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
           token_id: token?.token_id,
           symbol: token?.token_symbol,
           decimals: token.decimal,
-          // Force display balance to 1,000,000 for UI consistency
-          balance: isAuthenticated ? "1000000" : "0",
+          // Dev-friendly balance when enabled
+          balance:
+            ((import.meta as any)?.env?.NEXT_PUBLIC_DEV_BAL_FIX?.toString?.().toLowerCase?.() === "true")
+              ? "1000000"
+              : asset?.balance || "0",
           token_address: token?.token_address,
           min_deposit_amount: token?.min_deposit_amount,
           min_deposit_amount_usd: token?.min_deposit_amount_usd,
@@ -143,9 +148,8 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
 
   const depositAmountUsd = useMemo(() => {
     const usd_price = tokenPrices?.[collateralToken?.token_id] || 0;
-    return new BigNumber(depositAmount || "0")
-      .multipliedBy(usd_price)
-      .toNumber();
+    if (!usd_price) return null;
+    return new BigNumber(depositAmount || "0").multipliedBy(usd_price).toNumber();
   }, [depositAmount, collateralToken, tokenPrices]);
 
   const { data: swapDepositInfo } = useSwapDepositInfo(
@@ -331,7 +335,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
           </div>
         )}
 
-        <div className="rounded-b-lg border border-white/0.20 p-4 mb-3">
+        <div className="rounded-b-lg border border-white/20 p-4 mb-3">
           <div className=" bg-black flex items-center justify-between pb-2">
             <LabelWithTooltip
               label="Est. Receive"
@@ -339,35 +343,32 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
               tooltipContent="Estimated amount based on current NDLP price. Final amount may vary slightly due to market conditions during processing."
             />
           </div>
-          <div className="flex md:flex-row md:justify-between text-gray-200 font-bold font-mono items-center mb-2 md:mb-3 justify-end flex-row-reverse">
-            <DynamicFontText
-              maxWidth={300}
-              breakpoints={[
-                { minLength: 0, fontSize: isMd ? "text-3xl" : "text-2xl" },
-                { minLength: 15, fontSize: isMd ? "text-2xl" : "text-xl" },
-                { minLength: 20, fontSize: isMd ? "text-xl" : "text-lg" },
-              ]}
-              defaultFontSize={isMd ? "text-2xl" : "text-xl"}
-            >
-              {ndlpAmount
-                ? ` ${formatAmount({
-                    amount: ndlpAmount,
-                    precision: vault?.vault_lp_token_decimals || 6,
-                    stripZero: true,
-                  })} `
-                : "--"}
-            </DynamicFontText>
-            <div
-              className={"flex items-center gap-2 font-bold text-sm md:text-lg"}
-            >
-              <img
-                src="/coins/ndlp.png"
-                alt="NDLP"
-                className="w-6 h-6 max-md:mr-2"
-              />
-              {isMd && lpToken?.display_name}
+          {(["degraded", "cooldown", "protective"].includes(devStatusNorm)) && (
+            <div className="text-xs text-white/80 bg-white/5 border border-white/15 rounded-md p-3">
+              Estimates are temporarily unavailable while the network is unstable / in protective mode. Funds are safe.
             </div>
-          </div>
+          )}
+          {!(["degraded", "cooldown", "protective"].includes(devStatusNorm)) && (
+            <div className="flex md:flex-row md:justify-between text-gray-200 font-bold font-mono items-center mb-2 md:mb-3 justify-end flex-row-reverse">
+              <DynamicFontText
+                maxWidth={300}
+                breakpoints={[
+                  { minLength: 0, fontSize: isMd ? "text-3xl" : "text-2xl" },
+                  { minLength: 15, fontSize: isMd ? "text-2xl" : "text-xl" },
+                  { minLength: 20, fontSize: isMd ? "text-xl" : "text-lg" },
+                ]}
+                defaultFontSize={isMd ? "text-2xl" : "text-xl"}
+              >
+                {ndlpAmount
+                  ? ` ${formatAmount({ amount: ndlpAmount, precision: vault?.vault_lp_token_decimals || 6, stripZero: true })} `
+                  : "--"}
+              </DynamicFontText>
+              <div className={"flex items-center gap-2 font-bold text-sm md:text-lg"}>
+                <SymbolTokenIcon symbol={lpToken?.display_name || "NDLP"} className="w-6 h-6 max-md:mr-2" />
+                {isMd && lpToken?.display_name}
+              </div>
+            </div>
+          )}
           <hr className="w-full border-t border-white/15" />
           <div className="flex flex-col gap-2 mt-3">
             <ConversationRate

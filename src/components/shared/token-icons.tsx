@@ -1,4 +1,8 @@
-const TOKEN_ICONS = {};
+const TOKEN_ICONS = {
+  SUI: "/coins/sui.png",
+  USDC: "/coins/usdc.png",
+  NDLP: "/coins/ndlp.png",
+} as const;
 
 export interface TokenIconProps {
   token: keyof typeof TOKEN_ICONS;
@@ -16,6 +20,12 @@ export function TokenIcon({ token, size = 24, className }: TokenIconProps) {
       className={className}
     />
   );
+}
+
+export function SymbolTokenIcon({ symbol, size = 24, className }: { symbol?: string; size?: number; className?: string }) {
+  const key = (symbol || "").toUpperCase() as keyof typeof TOKEN_ICONS;
+  const token = TOKEN_ICONS[key] ? (key as keyof typeof TOKEN_ICONS) : ("SUI" as keyof typeof TOKEN_ICONS);
+  return <TokenIcon token={token} size={size} className={className} />;
 }
 
 const mapVaultIdToTokens = (

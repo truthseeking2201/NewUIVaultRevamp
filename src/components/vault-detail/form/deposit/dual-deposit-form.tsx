@@ -18,7 +18,7 @@ import {
 } from "@/hooks/use-deposit-vault";
 import { useToast } from "@/hooks/use-toast";
 import { useTokenPrices } from "@/hooks/use-token-price";
-import { getBalanceAmountForInput } from "@/lib/number";
+import { DEV_BAL, getBalanceAmountForInput, isDevBalEnabled, toSafeNumber } from "@/lib/number";
 import { cn, formatAmount } from "@/lib/utils";
 import debounce from "lodash-es/debounce";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -77,22 +77,21 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
   const [isOpenRiskDisclosure, setIsOpenRiskDisclosure] = useState(false);
 
   const paymentTokens = useMemo(() => {
+    const dev = isDevBalEnabled();
     return [pool?.token_a, pool?.token_b]?.filter(Boolean)?.map((token) => {
-      const asset = assets.find(
-        (asset) => asset.coin_type === token?.token_address
-      );
-
+      const asset = assets.find((a) => a.coin_type === token?.token_address);
+      const rawBal = asset?.balance ?? "0";
+      const safeBal = dev ? String(DEV_BAL) : String(toSafeNumber(rawBal, 0));
       return {
         token_id: token?.token_id,
         symbol: token?.token_symbol,
         decimals: token?.decimal ?? 6,
-        // Force display balance to 1,000,000 for UI consistency
-        balance: isAuthenticated ? "1000000" : "0",
+        balance: safeBal,
         token_address: token?.token_address,
         price_feed_id: token?.price_feed_id,
       };
     });
-  }, [pool, assets, isAuthenticated]);
+  }, [pool, assets]);
 
   const tokenIds = useMemo(() => {
     return paymentTokens?.map((token) => token?.token_id) || [];

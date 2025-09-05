@@ -9,6 +9,7 @@ import useBreakpoint from "@/hooks/use-breakpoint";
 import { cn, formatAmount } from "@/lib/utils";
 import { DepositToken } from "@/types/deposit-token.types";
 import { ChevronDown, X } from "lucide-react";
+import { SymbolTokenIcon } from "@/components/shared/token-icons";
 import { useState } from "react";
 
 type SelectTokensProps = {
@@ -36,11 +37,7 @@ const SelectTokens = ({
         onClick={() => setIsOpen(true)}
       >
         <div className="flex items-center gap-1">
-          <img
-            src={`/coins/${currentToken?.symbol?.toLowerCase()}.png`}
-            alt={currentToken?.symbol}
-            className="w-4 h-4 mr-1 rounded-xl"
-          />
+          <SymbolTokenIcon symbol={currentToken?.symbol} className="w-4 h-4 mr-1 rounded-xl" />
           <span
             className={cn(
               "text-white font-medium",
@@ -90,11 +87,7 @@ const SelectTokens = ({
                 }}
               >
                 <div className="flex items-center justify-between">
-                  <img
-                    src={`/coins/${token.symbol?.toLowerCase()}.png`}
-                    alt={token.symbol}
-                    className="w-10 h-10 mr-3 rounded-[20px]"
-                  />
+                  <SymbolTokenIcon symbol={token.symbol} className="w-10 h-10 mr-3 rounded-[20px]" />
                   <span className="text-white text-base font-medium">
                     {token.symbol}
                   </span>

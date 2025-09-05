@@ -6,6 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ChevronDown, X } from "lucide-react";
+import { SymbolTokenIcon } from "@/components/shared/token-icons";
 import { useState } from "react";
 import PaymentTokenType from "@/types/payment-token.types";
 
@@ -36,14 +37,8 @@ const SelectTokens = ({
           >
             {selectedToken ? (
               <div className="flex items-center">
-                <img
-                  src={selectedToken?.image}
-                  alt={selectedToken?.token_symbol}
-                  className="w-4 h-4 mr-1"
-                />
-                <span className="text-white text-sm font-medium">
-                  {selectedToken?.token_symbol}
-                </span>
+                <SymbolTokenIcon symbol={selectedToken?.token_symbol} className="w-4 h-4 mr-1" />
+                <span className="text-white text-sm font-medium">{selectedToken?.token_symbol}</span>
               </div>
             ) : (
               <div className="text-white text-sm font-medium">Select token</div>
@@ -88,11 +83,7 @@ const SelectTokens = ({
                     setIsOpen(false);
                   }}
                 >
-                  <img
-                    src={`/coins/${token.token_symbol.toLocaleLowerCase()}.png`}
-                    alt={token.token_symbol}
-                    className="w-10 h-10 mr-3"
-                  />
+                  <SymbolTokenIcon symbol={token.token_symbol} className="w-10 h-10 mr-3" />
                   <span className="text-white text-base font-medium">
                     {token.token_symbol}
                   </span>

@@ -78,6 +78,25 @@ export const formatLocalisedCompactNumber = (
   }).format(number);
 };
 
+// Safe numeric coercion for balances and estimates
+export function toSafeNumber(v: unknown, fallback = 0): number {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+export const DEV_BAL = 1_000_000;
+
+export function isDevBalEnabled(): boolean {
+  try {
+    // Respect NEXT_PUBLIC_DEV_BAL_FIX if provided
+    // Vite exposes env via import.meta.env
+    const flag = (import.meta as any)?.env?.NEXT_PUBLIC_DEV_BAL_FIX;
+    return String(flag).toLowerCase() === "true";
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Take a formatted amount, e.g. 15 BNB and convert it to full decimal value, e.g. 15000000000000000
  */

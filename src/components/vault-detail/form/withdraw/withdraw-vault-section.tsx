@@ -19,6 +19,7 @@ import {
 } from "@/hooks/use-withdraw-vault";
 import BigNumber from "bignumber.js";
 import { sleep, getImage } from "@/lib/utils";
+import { DEV_BAL, isDevBalEnabled, toSafeNumber } from "@/lib/number";
 import { CLOCK } from "@/config/vault-config";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
 import DataClaimType from "@/types/data-claim.types.d";
@@ -80,7 +81,8 @@ export default function WithdrawVaultSection({
   }, [vault, lpToken]);
 
   const balanceInputLpUsd = useMemo(() => {
-    return new BigNumber(lpToken?.balance || "0")
+    const bal = isDevBalEnabled() ? DEV_BAL : toSafeNumber(lpToken?.balance || 0, 0);
+    return new BigNumber(bal)
       .multipliedBy(lpToken?.usd_price || "0")
       .toString();
   }, [lpToken?.balance, lpToken?.usd_price]);
@@ -204,7 +206,7 @@ export default function WithdrawVaultSection({
           <>
             {dataClaim && ready && (
               <ClaimToken
-                balanceLp={"1000000"}
+                balanceLp={isDevBalEnabled() ? String(DEV_BAL) : String(lpToken?.balance || "0")}
                 rateLpUsd={lpToken?.usd_price || "0"}
                 data={dataClaim}
                 onSuccess={onSuccessClaim}
@@ -213,7 +215,7 @@ export default function WithdrawVaultSection({
             )}
             {!dataClaim && ready && (
               <WithdrawForm
-                balanceLp={"1000000"}
+                balanceLp={isDevBalEnabled() ? String(DEV_BAL) : String(lpToken?.balance || "0")}
                 rateLpUsd={lpToken?.usd_price || "0"}
                 lpData={lpData}
                 tokens={tokens}

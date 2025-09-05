@@ -3,6 +3,7 @@ import { TokenType } from "@/types/lp.type";
 import { showFormatNumber } from "@/lib/number";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { SymbolTokenIcon } from "@/components/shared/token-icons";
 
 type Props = {
   amount: number | null;
@@ -20,31 +21,25 @@ const AmountToken = ({ amount, token, className = "", isLoading }: Props) => {
       )}
     >
       <div className="flex items-center">
-        <img
-          src={token?.image}
-          alt={token?.token_symbol}
-          className="w-6 h-6 mr-2"
-        />
+        <SymbolTokenIcon symbol={token?.token_symbol} className="w-6 h-6 mr-2" />
         <div className="text-lg max-md:hidden">{token?.token_symbol}</div>
       </div>
       {isLoading ? (
         <Skeleton className="w-24 md:w-32 h-6 md:h-7" />
       ) : (
-        <DynamicFontText
-          maxWidth={300}
-          breakpoints={[
-            {
-              minLength: 0,
-              fontSize: "text-[32px] leading-[24px] max-sm:text-lg",
-            },
-            { minLength: 13, fontSize: "text-lg max-sm:text-base" },
-            { minLength: 18, fontSize: "text-base max-sm:text-sm" },
-          ]}
-        >
-          {amount
-            ? `${showFormatNumber(amount, 0, Math.min(token.decimal, 6))} `
-            : "--"}
-        </DynamicFontText>
+        <div className="flex flex-col items-end">
+          <DynamicFontText
+            maxWidth={300}
+            breakpoints={[
+              { minLength: 0, fontSize: "text-[32px] leading-[24px] max-sm:text-lg" },
+              { minLength: 13, fontSize: "text-lg max-sm:text-base" },
+              { minLength: 18, fontSize: "text-base max-sm:text-sm" },
+            ]}
+          >
+            {amount ? `${showFormatNumber(amount, 0, Math.min(token.decimal, 6))} ` : "--"}
+          </DynamicFontText>
+          <span className="text-xs text-white/60 tabular-nums">≈ —</span>
+        </div>
       )}
     </div>
   );

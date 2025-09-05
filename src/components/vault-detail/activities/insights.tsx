@@ -249,53 +249,7 @@ export default function ActivitiesInsights({ vault_id, timeRange, filter, onQuic
               )}
             </AnimatePresence>
 
-            <AnimatePresence initial={false}>
-              {showReasoning && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="rounded-lg border border-white/10 bg-white/[0.03] p-3"
-                >
-                  <div className="text-xs text-white/70 mb-2 flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1">
-                      <Brain size={12} className="text-nova" />
-                      How we inferred this
-                    </span>
-                  </div>
-                  <ol className="space-y-2 text-[12px] text-white/80">
-                    <motion.li initial={{ x: -8, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.05 }}>
-                      1. Parse {rowsCount(data)} recent transactions in {timeRange} window.
-                    </motion.li>
-                    <motion.li initial={{ x: -8, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.15 }}>
-                      2. Classify by type and compute USD legs per tx.
-                    </motion.li>
-                    <motion.li initial={{ x: -8, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.25 }}>
-                      3. Aggregate inflow (Add/Open) vs outflow (Remove/Close) to get net.
-                    </motion.li>
-                    <motion.li initial={{ x: -8, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.35 }}>
-                      4. Estimate swap volume via min(USD leg A, leg B).
-                    </motion.li>
-                    {insights.topReason && (
-                      <motion.li initial={{ x: -8, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.45 }}>
-                        5. Detect dominant driver from reasons → “{insights.topReason}”.
-                      </motion.li>
-                    )}
-                  </ol>
-                  <div className="mt-3 grid grid-cols-4 gap-2 text-[11px]">
-                    <Chip label="Add/Open" value={insights.typeCount["ADD_LIQUIDITY"] || 0 + (insights.typeCount["OPEN"] || 0)} color="emerald" />
-                    <Chip label="Remove/Close" value={insights.typeCount["REMOVE_LIQUIDITY"] || 0 + (insights.typeCount["CLOSE"] || 0)} color="orion" />
-                    <Chip label="Swaps" value={insights.typeCount["SWAP"] || 0} color="violet" />
-                    <div className="px-2 py-1 rounded-md border border-white/10 bg-white/5 text-white/80 flex items-center justify-between"><span>Stop-loss</span><span className="font-mono">{insights.stopLossCount || 0}</span></div>
-                  </div>
-                  <div className="mt-3 text-[11px] text-white/50 flex items-center gap-1">
-                    <Sparkles size={12} className="text-nova" />
-                    <span>Auto-adapts to filters and time range</span>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {/* Legacy detail block removed per spec */}
           </div>
         ) : (
           <div className="text-white/60 text-sm">No activity in the selected period.</div>
@@ -309,19 +263,14 @@ function rowsCount(data: any): number {
   return Array.isArray(data) ? data.length : 0;
 }
 
-function Chip({ label, value, color }: { label: string; value: number; color: "emerald" | "orion" | "violet" }) {
-  const styles =
-    color === "emerald"
-      ? "bg-emerald/10 text-emerald border-emerald/20"
-      : color === "orion"
-      ? "bg-orion/10 text-orion border-orion/20"
-      : "bg-violet/10 text-violet border-violet/20";
-  return (
-    <div className={cn("flex items-center justify-between px-2 py-1 rounded-md border text-[11px]", styles)}>
-      <span>{label}</span>
-      <span className="font-mono">{value}</span>
-    </div>
-  );
+function changeSummary(inflow: number, outflow: number, swapVol: number, rebalances: number): string {
+  const parts: string[] = [];
+  parts.push(inflow >= outflow ? 'More adds than removes' : 'More removes than adds');
+  const total = Math.max(1, inflow + outflow);
+  const swapRatio = swapVol / total;
+  parts.push(swapRatio < 0.1 ? 'low swap volume' : swapRatio > 0.4 ? 'high swap volume' : 'moderate swap volume');
+  parts.push(rebalances <= 2 ? 'rebalances were few' : rebalances >= 12 ? 'many rebalances' : 'moderate rebalances');
+  return parts.join('; ') + '.';
 }
 
 function confidenceText(v: number): string {

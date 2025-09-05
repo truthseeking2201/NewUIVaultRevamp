@@ -12,6 +12,8 @@ import { TriangleAlert } from "lucide-react";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { validateDepositBalance } from "./helpers";
 import { SUI_CONFIG } from "@/config";
+import { SymbolTokenIcon } from "@/components/shared/token-icons";
+import { toSafeNumber } from "@/lib/number";
 
 type DepositInputProps = {
   tokenA: DepositToken;
@@ -72,14 +74,16 @@ const DepositDualInput = ({
     tokenAError?.type === "max" && tokenBError?.type === "max";
 
   const tokenAUsd = useMemo(() => {
+    if (!toSafeNumber(tokenA.usd_price)) return null;
     return new BigNumber(formTokenA?.amount || "0")
-      .multipliedBy(tokenA.usd_price || 0)
+      .multipliedBy(toSafeNumber(tokenA.usd_price))
       .toNumber();
   }, [tokenA, formTokenA?.amount]);
 
   const tokenBUsd = useMemo(() => {
+    if (!toSafeNumber(tokenB.usd_price)) return null;
     return new BigNumber(formTokenB?.amount || "0")
-      .multipliedBy(tokenB.usd_price || 0)
+      .multipliedBy(toSafeNumber(tokenB.usd_price))
       .toNumber();
   }, [tokenB, formTokenB?.amount]);
 
@@ -152,10 +156,7 @@ const DepositDualInput = ({
               <div className="flex items-center space-x-2">
                 <span className="text-white/80 text-sm font-medium font-sans">
                   {tokenA
-                    ? formatAmount({
-                        amount: tokenA.balance,
-                        precision: tokenA.decimals,
-                      })
+                    ? formatAmount({ amount: toSafeNumber(tokenA.balance, 0), precision: Math.min(6, Number(tokenA.decimals || 6)) })
                     : "--"}{" "}
                   {tokenA?.symbol}
                 </span>
@@ -163,26 +164,22 @@ const DepositDualInput = ({
             }
             balanceInputUsd={
               <span className="text-white/50 text-sm font-medium font-sans">
-                {tokenA
-                  ? formatAmount({
-                      amount: tokenAUsd,
-                      precision: 2,
-                      minimumDisplay: 0.01,
-                      sign: "$",
-                    })
-                  : "$--"}{" "}
+                {tokenAUsd != null
+                  ? formatAmount({ amount: tokenAUsd, precision: 2, minimumDisplay: 0.01, sign: "$" })
+                  : "—"}
               </span>
             }
             rightInput={
               <div className="flex items-center">
-                <img
-                  src={`/coins/${tokenA.symbol?.toLowerCase()}.png`}
-                  alt={tokenA.symbol}
-                  className="md:w-6 md:h-6 mr-2 w-5 h-5"
-                />
-                <span className="font-mono text-sm md:text-lg font-bold text-gray-200">
-                  {tokenA.symbol}
-                </span>
+                {(() => {
+                  const symA = tokenA?.symbol || "SUI";
+                  return (
+                    <>
+                      <SymbolTokenIcon symbol={symA} className="md:w-6 md:h-6 mr-2 w-5 h-5" />
+                      <span className="font-mono text-sm md:text-lg font-bold text-gray-200">{symA}</span>
+                    </>
+                  );
+                })()}
               </div>
             }
           />
@@ -270,10 +267,7 @@ const DepositDualInput = ({
               <div className="flex items-center space-x-2">
                 <span className="text-white/80 text-sm font-medium font-sans">
                   {tokenB
-                    ? formatAmount({
-                        amount: tokenB.balance,
-                        precision: tokenB.decimals,
-                      })
+                    ? formatAmount({ amount: toSafeNumber(tokenB.balance, 0), precision: Math.min(6, Number(tokenB.decimals || 6)) })
                     : "--"}{" "}
                   {tokenB?.symbol}
                 </span>
@@ -281,26 +275,23 @@ const DepositDualInput = ({
             }
             balanceInputUsd={
               <span className="text-white/50 text-sm font-medium font-sans">
-                {tokenB
-                  ? formatAmount({
-                      amount: tokenBUsd,
-                      precision: 2,
-                      minimumDisplay: 0.01,
-                      sign: "$",
-                    })
-                  : "$--"}{" "}
+                {tokenBUsd != null
+                  ? formatAmount({ amount: tokenBUsd, precision: 2, minimumDisplay: 0.01, sign: "$" })
+                  : "—"}
               </span>
             }
             rightInput={
               <div className="flex items-center">
-                <img
-                  src={`/coins/${tokenB.symbol?.toLowerCase()}.png`}
-                  alt={tokenB.symbol}
-                  className="md:w-6 md:h-6 mr-2 w-5 h-5"
-                />
-                <span className="font-mono text-sm md:text-lg font-bold text-gray-200">
-                  {tokenB.symbol}
-                </span>
+                {(() => {
+                  const symA = tokenA?.symbol || "SUI";
+                  const symB = tokenB?.symbol || (symA === "SUI" ? "USDC" : "SUI");
+                  return (
+                    <>
+                      <SymbolTokenIcon symbol={symB} className="md:w-6 md:h-6 mr-2 w-5 h-5" />
+                      <span className="font-mono text-sm md:text-lg font-bold text-gray-200">{symB}</span>
+                    </>
+                  );
+                })()}
               </div>
             }
           />
