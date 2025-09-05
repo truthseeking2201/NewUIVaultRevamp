@@ -271,11 +271,11 @@ const YourHoldings = ({
               <HoldingCard>
                 <LabelWithTooltip
                   hasIcon={false}
-                  label="Token Allocation (live estimate)"
+                  label="Estimated LP Breakdown (secure, updates in ~1h)"
                   tooltipContent={
                     <div className="text-white/80 text-xs font-sans">
-                      Live estimate of underlying tokens based on your current share.
-                      For a secure hourly snapshot, see "Estimated LP Breakdown" below.
+                      Breakdown of underlying tokens based on the your ownership
+                      share in the vault
                     </div>
                   }
                   labelClassName="text-white/60 md:text-sm text-[10px] mb-2 underline underline-offset-4 decoration-dotted decoration-gray-600"
@@ -789,7 +789,7 @@ export function MyPositionSection({
   return (
     <div className="flex flex-col gap-4">
       {/* NDLP Price Chart with zones */}
-      <PositionStatus ndlpPrice={ndlpPrice} breakEven={breakEven} />
+      <PositionStatus />
       <DetailWrapper title="My Balance" isLoading={!!isDetailLoading} loadingStyle="h-[80px] w-full">
         {!showData ? (
           <div className="text-white/70 text-sm">Connect wallet to view your position.</div>
@@ -972,6 +972,10 @@ function mpExposureText(holding: any): string {
 
 function EstimatedLpBreakdown({ vault_id, embedded = false }: { vault_id: string; embedded?: boolean }) {
   const { data, isLoading, isDegraded } = useLpBreakdown(vault_id);
+  // Interactivity state MUST be declared unconditionally to satisfy React hook rules
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+  const activeIdx = selectedIdx != null ? selectedIdx : hoverIdx;
 
   // Formatting helpers
   const percentText = (v: number) => {
@@ -1039,11 +1043,6 @@ function EstimatedLpBreakdown({ vault_id, embedded = false }: { vault_id: string
   const displaySlices = othersUsd > 0 || othersPct > 0
     ? [...topWithColor, { label: 'Others', percent: Number(othersPct.toFixed(1)), usd: othersUsd, color: muted }]
     : topWithColor;
-
-  // Interactivity state
-  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
-  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
-  const activeIdx = selectedIdx != null ? selectedIdx : hoverIdx;
 
   // Keyboard support on the donut container
   const onKeyDown = (e: React.KeyboardEvent) => {

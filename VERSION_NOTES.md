@@ -89,27 +89,3 @@ How to run
 
 Revert guidance
 - If using git, tag this version as v1.2.4. To revert later: `git checkout v1.2.4`.
-
-Version 1.2.5 — Mock data for cards + LP Breakdown donut + Live chart
-
-Date: 2025-09-04
-
-Summary
-- Filled all six “Your Holdings” cards with robust mock data in dev: My Balance, Exit Simulation, P&L Breakdown, Risk & Strategy, Yield Info, Cashflow. Values are large but formula-correct (currentValue, netDeposited, PnL, break-even, fees, IL, performance fee, net PnL).
-- Added secure “Estimated LP Breakdown • Secure, updates ~1h” as its own card (moved out of Risk & Strategy); includes donut chart + scrollable legend (top 8, +X more), timestamp, and degraded state.
-- Improved “Token Allocation (live estimate)” inside the expandable header section to avoid confusion with secure snapshot.
-- Implemented real-time line for “Your Position Status”: rolling series updates every second with zone bands and period toggle (1D/1W).
-- Strengthened mocks: lp-breakdown endpoint returns a stable USDC/SUI split; user-holding synthesizes a non-zero NDLP balance when absent for meaningful demos.
-
-Files of note
-- src/components/vault-detail/sections/your-holdings.tsx (fixtures, card fallbacks, LP breakdown placement, UI tweaks)
-- src/components/vault-detail/charts/user-position.tsx (real-time chart)
-- src/components/vault-detail/sections/position-status.tsx (period value fix)
-- src/mocks/http.ts (user holding + lp-breakdown mock enhancements)
-
-How to run
-- Dev with mocks: `yarn dev` (optionally set `VITE_MOCK_MODE=true`)
-- Build: `yarn build`
-
-Revert guidance
-- Tag this version as v1.2.5. To revert later: `git checkout v1.2.5`.

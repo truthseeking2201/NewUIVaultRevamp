@@ -428,9 +428,7 @@ const http = {
       const vaultRow = (depositVaults as any[]).find((v) => v.vault_id === vaultId);
       const priceStr = (vaultRow?.ndlp_price_usd as string) || "1.02";
       const price = Number(priceStr) || 1.02;
-      let ndlpBal = Number(ndlpBalanceStr) || 0;
-      // In mock mode, surface meaningful non-zero balances to showcase UI
-      if (ndlpBal === 0) ndlpBal = 8200;
+      const ndlpBal = Number(ndlpBalanceStr) || 0;
       const liquidityUSD = Math.max(0, ndlpBal * price);
 
       // Split into USDC/SUI for the breakdown
@@ -478,20 +476,11 @@ const http = {
     // LP Breakdown (secure snapshot ~1h)
     if (/\/data-management\/external\/vaults\/.+\/lp-breakdown$/.test(pathname)) {
       const asOf = new Date().toISOString();
-      // Provide a longer list to exercise top-8 + Others behavior
-      const base = [
-        { label: 'USDC', percent: 34.0, usd: 3400.0 },
-        { label: 'SUI', percent: 26.0, usd: 2600.0 },
-        { label: 'WETH', percent: 10.0, usd: 1000.0 },
-        { label: 'WBTC', percent: 8.0, usd: 800.0 },
-        { label: 'SOL', percent: 6.0, usd: 600.0 },
-        { label: 'ARB', percent: 5.0, usd: 500.0 },
-        { label: 'AVAX', percent: 4.0, usd: 400.0 },
-        { label: 'UNI', percent: 3.0, usd: 300.0 },
-        { label: 'TIA', percent: 2.0, usd: 200.0 },
-        { label: 'BONK', percent: 2.0, usd: 200.0 },
+      const slices = [
+        { label: 'USDC', percent: 62.0, usd: 5280.0, color: '#52BDE1' },
+        { label: 'SUI', percent: 38.0, usd: 3248.0, color: '#CC98FF' },
       ];
-      return ok({ asOf, slices: base });
+      return ok({ asOf, slices });
     }
 
     // Deposit tokens

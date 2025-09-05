@@ -1,7 +1,7 @@
 {
   "name": "nodo-ai-vaults",
   "private": true,
-  "version": "1.2.5",
+  "version": "1.2.4",
   "type": "module",
   "scripts": {
     "dev": "VITE_MOCK_MODE=true vite",

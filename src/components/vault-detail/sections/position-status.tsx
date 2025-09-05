@@ -4,7 +4,7 @@ import { useState } from "react";
 import { PERIOD_TABS } from "@/components/vault-detail/constant";
 import UserPosition from "../charts/user-position";
 
-const PositionStatus = ({ ndlpPrice, breakEven }: { ndlpPrice?: number; breakEven?: number }) => {
+const PositionStatus = () => {
   const [positionPeriodTab, setPositionPeriodTab] = useState("ONE_DAY");
 
   return (
@@ -27,7 +27,7 @@ const PositionStatus = ({ ndlpPrice, breakEven }: { ndlpPrice?: number; breakEve
         </div>
       }
     >
-      <UserPosition period={positionPeriodTab} ndlpPrice={ndlpPrice} breakEven={breakEven} />
+      <UserPosition period={positionPeriodTab} />
     </DetailWrapper>
   );
 };

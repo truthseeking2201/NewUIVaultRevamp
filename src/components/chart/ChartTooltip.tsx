@@ -15,6 +15,7 @@ export function ChartTooltip({
   return (
     <div
       className={cn(
+        // container
         "rounded-md px-3 py-2 min-w-[220px] max-w-[320px]",
         "bg-popover/90 text-popover-foreground",
         "border border-border/60 shadow-lg shadow-black/20",

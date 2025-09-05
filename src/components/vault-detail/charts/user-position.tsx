@@ -1,63 +1,105 @@
 import React, { useState, useEffect, Fragment, useMemo, useRef } from "react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceArea, ReferenceLine } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceArea,
+  ReferenceLine,
+} from "recharts";
 import { mockDataLiveChart, mockDataLiveChart2 } from "../constant";
 
-type Period = "ONE_DAY" | "ONE_WEEK";
+const UserPosition = ({ period }) => {
+  console.log("UserPosition rendered with period:", period);
+  const [timeFilter, setTimeFilter] = useState(period);
+  // Local live data stream generated from the selected mock baseline
+  const baselineRef = useRef(mockDataLiveChart);
+  const [liveData, setLiveData] = useState(baselineRef.current);
+  const tickRef = useRef(0);
 
-const UserPosition = ({ period }: { period: Period }) => {
-  const [series, setSeries] = useState<Array<{ time: string; percentage: number }>>([]);
-  const timerRef = useRef<number | null>(null);
+  // Switch baseline when tab changes
+  const chartData = useMemo(() => {
+    if (timeFilter === "ONE_DAY") return mockDataLiveChart;
+    if (timeFilter === "ONE_WEEK") return mockDataLiveChart2;
+    return mockDataLiveChart;
+  }, [timeFilter]);
 
-  const maxPoints = period === "ONE_WEEK" ? 300 : 120; // rolling window
-
-  // Seed from base mocks for a familiar shape, then stream in small updates
-  const seedInitial = useMemo(() => {
-    const base = period === "ONE_WEEK" ? mockDataLiveChart2 : mockDataLiveChart;
-    const mapped = base.slice(-maxPoints).map((d: any, idx: number) => ({
-      time: d.time || new Date(Date.now() - (maxPoints - idx) * 1000).toLocaleTimeString(),
-      percentage: typeof d.percentage === "number" ? d.percentage : 0,
-    }));
-    if (mapped.length) return mapped;
-    let v = 0;
-    const arr: { time: string; percentage: number }[] = [];
-    for (let i = 0; i < maxPoints; i++) {
-      v = Math.max(-12, Math.min(12, v + (Math.random() - 0.5) * 1.2));
-      arr.push({ time: new Date(Date.now() - (maxPoints - i) * 1000).toLocaleTimeString(), percentage: v });
+  const checkPositionOfPrice = useMemo(() => {
+    for (let i = liveData.length - 1; i >= 0; i--) {
+      if (typeof (liveData as any)[i]?.price === "number" && !isNaN((liveData as any)[i]?.price)) {
+        return i;
+      }
     }
-    return arr;
-  }, [period, maxPoints]);
+    return null;
+  }, [liveData]);
 
   useEffect(() => {
-    setSeries(seedInitial);
-  }, [seedInitial]);
+    setTimeFilter(period);
+  }, [period]);
 
+  // Reset live stream when baseline changes
   useEffect(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-    timerRef.current = window.setInterval(() => {
-      setSeries((prev) => {
-        const last = prev.length ? prev[prev.length - 1].percentage : 0;
-        const next = Math.max(-12, Math.min(12, last + (Math.random() - 0.5) * 0.6));
-        const point = { time: new Date().toLocaleTimeString(), percentage: next };
-        const combined = [...prev, point];
-        return combined.length > maxPoints ? combined.slice(combined.length - maxPoints) : combined;
+    baselineRef.current = chartData;
+    setLiveData(chartData);
+    tickRef.current = 0;
+  }, [chartData]);
+
+  // Mock real-time updates: shift + append a new point every 1s
+  useEffect(() => {
+    const id = setInterval(() => {
+      setLiveData((prev) => {
+        if (!prev?.length) return prev;
+        const last = prev[prev.length - 1];
+        const lastTs = last?.ts ? new Date(last.ts).getTime() : Date.now();
+        const nextTs = lastTs + 60 * 1000; // advance by 1 minute per tick
+        const t = tickRef.current + prev.length; // monotonically increase
+        // Smooth mock series oscillating within ±9%
+        const nextPct = Math.sin((t % 360) / 12) * 9;
+        const next = {
+          ts: new Date(nextTs).toISOString(),
+          time: new Date(nextTs).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          percentage: nextPct,
+          price: (last?.price ?? 1) + (Math.random() - 0.5) * 0.1,
+        } as any;
+        tickRef.current += 1;
+        const copy = prev.slice(1).concat(next);
+        return copy;
       });
     }, 1000);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [maxPoints, period]);
-
-  const lastIndex = series.length ? series.length - 1 : null;
+    return () => clearInterval(id);
+  }, []);
 
   return (
-    <div>
+    <div className="relative">
+      {/* Center real-time line overlay (styled to match Figma) */}
+      <div aria-hidden className="pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2">
+        {/* Core line */}
+        <div
+          className="h-full"
+          style={{
+            width: 2,
+            background: "linear-gradient(180deg, #F2BB89 0%, #F3D2B5 50%, #F5C8A4 100%)",
+          }}
+        />
+        {/* Soft glow */}
+        <div
+          className="absolute inset-y-0 -left-[4px] right-[-4px] blur-sm"
+          style={{
+            background: "linear-gradient(180deg, rgba(242,187,137,0.25) 0%, rgba(243,210,181,0.4) 50%, rgba(245,200,164,0.25) 100%)",
+          }}
+        />
+        {/* End caps glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full" style={{ background: "#F5C8A4" }} />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full" style={{ background: "#F2BB89" }} />
+      </div>
+
       <ResponsiveContainer width="100%" height={300}>
         <LineChart
-          data={series}
-          margin={{ top: 16, right: 16, left: 16, bottom: 16 }}
+          data={liveData}
+          margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
           width={500}
           height={300}
         >
@@ -116,6 +158,7 @@ const UserPosition = ({ period }: { period: Period }) => {
             axisLine={false}
             tickLine={false}
             tick={{ fill: "#9ca3af", fontSize: 12 }}
+            padding={{ left: 10, right: 10 }}
           />
 
           <YAxis
@@ -133,9 +176,8 @@ const UserPosition = ({ period }: { period: Period }) => {
             dataKey="percentage"
             stroke="url(#customLineGradient)"
             strokeWidth={2}
-            isAnimationActive={false}
             dot={({ cx, cy, index }) =>
-              index === lastIndex ? (
+              index === checkPositionOfPrice ? (
                 <Fragment key={index}>
                   <circle
                     cx={cx}

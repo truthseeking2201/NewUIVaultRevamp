@@ -14,6 +14,7 @@ import ConditionRenderer from "@/components/shared/condition-renderer";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { VaultInfo } from "@/pages/vault-detail";
 import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
+import VaultSwitcher from "./vault-switcher";
 
 type VaultInfoProps = {
   vault: any;
@@ -139,11 +140,14 @@ const HeaderDetail = ({
         <div className="w-full flex items-center justify-between">
           <div>
             <PairIcons tokens={tokens} />
-            <ShinyText
-              text={formatVaultNameDisplay(vault.vault_name)}
-              className="text-base font-bold mt-3"
-              textColor="text-white/75"
-            />
+            <div className="flex items-center gap-1 mt-3">
+              <ShinyText
+                text={formatVaultNameDisplay(vault.vault_name)}
+                className="text-base font-bold"
+                textColor="text-white/75"
+              />
+              <VaultSwitcher />
+            </div>
             <div className="flex items-center gap-1 mt-1">
               <img
                 src={exchange.image}
@@ -192,11 +196,14 @@ const HeaderDetail = ({
             <PairIcons tokens={tokens} />
           </div>
           <div>
-            <ShinyText
-              text={formatVaultNameDisplay(vault.vault_name)}
-              className="text-2xl font-bold"
-              textColor="text-white/75"
-            />
+            <div className="flex items-center gap-1">
+              <ShinyText
+                text={formatVaultNameDisplay(vault.vault_name)}
+                className="text-2xl font-bold"
+                textColor="text-white/75"
+              />
+              <VaultSwitcher />
+            </div>
             <div className="flex items-center gap-1">
               <div className="text-white/50"> Powered by </div>
               <img
