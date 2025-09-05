@@ -110,8 +110,14 @@ export default function VaultSwitcher() {
           aria-haspopup="listbox"
           aria-expanded={open}
           className={cn(
-            "h-8 w-8 ml-1 inline-flex items-center justify-center rounded-md border border-white/15 text-white/80",
-            "hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            // Size & shape (exact radius request)
+            "h-8 w-8 ml-1 inline-flex items-center justify-center rounded-[53.333px]",
+            // Border & background per request
+            "border border-white/30 bg-black",
+            // Icon color
+            "text-muted-foreground",
+            // Focus ring & transitions retained
+            "focus:outline-none focus:ring-2 focus:ring-ring transition-colors transition-transform"
           )}
         >
           <ChevronDown className={cn("h-4 w-4 transition-transform", open && "rotate-180")} />
@@ -201,4 +207,3 @@ export default function VaultSwitcher() {
     </Popover>
   );
 }
-

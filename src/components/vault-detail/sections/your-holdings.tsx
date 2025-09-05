@@ -27,7 +27,7 @@ import ConditionRenderer from "@/components/shared/condition-renderer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEstimateWithdraw, useEstimateWithdrawDual, useLpBreakdown } from "@/hooks/use-vault";
 import { format } from "date-fns";
-import PositionStatus from "@/components/vault-detail/sections/position-status";
+import NdLpStatusChartCard from "@/components/vault-detail/sections/ndlp-status-chart-card";
 import { tokenIconPath } from "@/components/vault-detail/activities/utils";
 
 type YourHoldingProps = {
@@ -699,7 +699,7 @@ export function MyPositionSection({
   const ndlp_balance = lpToken?.balance || "0";
   const { data: holding } = useUserHolding(vault_id, ndlp_balance, authEnabled);
   // Dev/QA fixture — applied only in development
-  const fixture = (import.meta as any)?.env?.DEV
+  const fixture = !authEnabled
     ? {
         ndlpBalance: 8200.0,
         ndlpPriceUSD: 1.04,
@@ -707,9 +707,9 @@ export function MyPositionSection({
         totalDepositsUSD: 10000.0,
         totalWithdrawalsUSD: 1000.0,
         netDepositedUSD: 9000.0,
-        pnlSinceDepositUSD: -472.0,
-        pnlSinceDepositPct: -0.0524,
-        breakEvenPriceUSD: 1.09756,
+        pnlSinceDepositUSD: 16.0,
+        pnlSinceDepositPct: 0.0018,
+        breakEvenPriceUSD: 1.09756, // unrelated to P&L card but kept
         risk: {
           stopLossState: "Active",
           stopLossLastTs: "2025-09-02T22:14:05+07:00",
@@ -718,13 +718,21 @@ export function MyPositionSection({
           exposure: { USDC: 62, SUI: 38 },
           shareInVaultPct: 2.91,
         },
-        yield: { fees24hUSD: 18.22, netApy7dPct: 12.6 },
+        yield: { fees24hUSD: 1.28, netApy7dPct: 12.6 },
+        // P&L fixture values for QA
         attribution: {
-          feesAutoCompUSD: 312.45,
-          impermanentLossUSD: -602.3,
-          rangeRebalanceEffectUSD: -176.25,
-          performanceFeeUSD: -6.0,
-          netPnlUSD: -472.1,
+          feesAutoCompUSD: 248.0,
+          impermanentLossUSD: -173.0,
+          rangeRebalanceEffectUSD: -51.0,
+          performanceFeeUSD: -8.0,
+          netPnlUSD: 16.0,
+        },
+        pnl24h: {
+          feesAutoCompUSD: 1.28,
+          impermanentLossUSD: -0.92,
+          rangeRebalanceEffectUSD: -0.18,
+          performanceFeeUSD: -0.0,
+          netPnlUSD: 0.18,
         },
         cashflow: { totalDepositsUSD: 10000.0, totalWithdrawalsUSD: 1000.0 },
         exitEstimate: {
@@ -763,6 +771,7 @@ export function MyPositionSection({
   const netPnl = (fixture?.attribution?.netPnlUSD ?? pnl - perfFeeUsd);
 
   const [openExit, setOpenExit] = useState(false);
+  const [pnlPeriod, setPnlPeriod] = useState<"deposit" | "24h">("deposit");
   const [payoutToken, setPayoutToken] = useState<string>((vault?.tokens?.[0]?.token_address as string) || "");
   const payoutTokenSymbol = useMemo(() => {
     const t = vault?.tokens?.find((t) => t.token_address === payoutToken);
@@ -788,8 +797,8 @@ export function MyPositionSection({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* NDLP Price Chart with zones */}
-      <PositionStatus />
+      {/* Your Position Status (NDLP vs Break-even) */}
+      <NdLpStatusChartCard />
       <DetailWrapper title="My Balance" isLoading={!!isDetailLoading} loadingStyle="h-[80px] w-full">
         {!showData ? (
           <div className="text-white/70 text-sm">Connect wallet to view your position.</div>
@@ -847,37 +856,147 @@ export function MyPositionSection({
         )}
       </DetailWrapper>
 
-      <DetailWrapper id="pnl-card" title="P&L Breakdown" isLoading={!!isDetailLoading} loadingStyle="h-[120px] w-full">
+      <DetailWrapper id="pnl-card" title="P&L Breakdown" isLoading={!!isDetailLoading} loadingStyle="h-[120px] w-full"
+        titleComponent={
+          <div className="flex items-center gap-2">
+            <div className="text-white/60 text-xs hidden md:block">View:</div>
+            <div className="flex items-center gap-1 rounded-md border border-white/10 bg-white/5 p-1">
+              <button
+                type="button"
+                onClick={() => setPnlPeriod("deposit")}
+                aria-pressed={pnlPeriod === "deposit"}
+                className={cn(
+                  "px-2 py-1 text-xs rounded-md",
+                  pnlPeriod === "deposit" ? "bg-white/10 text-white" : "text-white/70 hover:text-white"
+                )}
+              >
+                Since deposit
+              </button>
+              <button
+                type="button"
+                onClick={() => setPnlPeriod("24h")}
+                aria-pressed={pnlPeriod === "24h"}
+                className={cn(
+                  "px-2 py-1 text-xs rounded-md",
+                  pnlPeriod === "24h" ? "bg-white/10 text-white" : "text-white/70 hover:text-white"
+                )}
+              >
+                24h
+              </button>
+            </div>
+          </div>
+        }
+      >
         {!showData ? (
           <div className="text-white/70 text-sm">Connect your wallet to view breakdown.</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <MPBreakdownItem
-              label="Fees earned (auto-compounded)"
-              value={`$${formatNumber(fixture?.attribution?.feesAutoCompUSD ?? Number((holding as any)?.user_rewards_24h_usd || 0), 0, 2)}`}
-            />
-            <MPBreakdownItem
-              label="Impermanent Loss (IL)"
-              value={`${(fixture?.attribution?.impermanentLossUSD ?? 0) < 0 ? "-" : "+"}$${formatNumber(Math.abs(fixture?.attribution?.impermanentLossUSD ?? 0), 0, 2)}`}
-            />
-            <MPBreakdownItem
-              label="Range/Rebalance effect"
-              value={`${(fixture?.attribution?.rangeRebalanceEffectUSD ?? 0) < 0 ? "-" : "+"}$${formatNumber(Math.abs(fixture?.attribution?.rangeRebalanceEffectUSD ?? 0), 0, 2)}`}
-              hint="Cost of resetting ranges (gas, swap) and realized IL when repositioning."
-            />
-            <MPBreakdownItem
-              label="Performance Fee"
-              value={`${perfFeeUsd > 0 ? "-" : ""}$${formatNumber(Math.abs(perfFeeUsd), 0, 2)}`}
-            />
-            <MPBreakdownItem
-              label="Net P&L"
-              value={`${netPnl >= 0 ? "+" : "-"}$${formatNumber(Math.abs(netPnl), 0, 2)}`}
-              emphasize
-            />
-            <div className="text-white/60 text-xs col-span-1 md:col-span-2 flex items-center justify-between">
-              <span>Since deposit</span>
-              <button className="text-white/70 hover:text-white text-xs underline underline-offset-4 decoration-dotted">What changed since yesterday?</button>
+          <div className="rounded-md border border-border/60 bg-white/5 p-3">
+            <div className="text-muted-foreground text-xs mb-2">
+              {pnlPeriod === "deposit" ? "Breakdown since your first deposit" : "Change in the last 24 hours"}
             </div>
+            {(() => {
+              // pick values per view
+              const dep = fixture?.attribution;
+              const d24 = fixture?.pnl24h;
+              const gains = pnlPeriod === "deposit" ? (dep?.feesAutoCompUSD ?? 0) : (d24?.feesAutoCompUSD ?? fixture?.yield?.fees24hUSD ?? 0);
+              const il = pnlPeriod === "deposit" ? (dep?.impermanentLossUSD ?? 0) : (d24?.impermanentLossUSD ?? 0);
+              const range = pnlPeriod === "deposit" ? (dep?.rangeRebalanceEffectUSD ?? 0) : (d24?.rangeRebalanceEffectUSD ?? 0);
+              const perf = pnlPeriod === "deposit" ? (dep?.performanceFeeUSD ?? 0) : (d24?.performanceFeeUSD ?? 0);
+              const net = pnlPeriod === "deposit" ? (dep?.netPnlUSD ?? 0) : (d24?.netPnlUSD ?? 0);
+              const gainsTotal = gains;
+              const costsTotal = Math.abs(il) + Math.abs(range) + Math.abs(perf);
+              return (
+                <div className="space-y-2">
+                  {/* Gains header */}
+                  <div role="rowheader" className="flex items-center justify-between py-2">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block h-4 w-1.5 rounded bg-emerald/60" aria-hidden="true" />
+                      <div className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Gains</div>
+                    </div>
+                    <div className="text-xs">
+                      <div className="inline-flex items-center rounded-md px-2 py-0.5 bg-emerald/20 text-emerald border border-emerald/30">+${formatNumber(gainsTotal, 0, 2)}</div>
+                    </div>
+                  </div>
+                  {/* Gains items */}
+                  <div className="flex items-center justify-between py-1.5">
+                    <LabelWithTooltip
+                      labelClassName="text-sm text-foreground/80"
+                      label="Fees earned (auto-compounded)"
+                      tooltipContent={<div className="max-w-[260px] text-xs">Fees automatically reinvested into your share price (not claimable separately).</div>}
+                    />
+                    <span className="text-sm font-medium tabular-nums">${formatNumber(gains, 0, 2)}</span>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="border-t border-border/50 my-1" />
+
+                  {/* Costs header */}
+                  <div role="rowheader" className="flex items-center justify-between py-2">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block h-4 w-1.5 rounded bg-destructive/60" aria-hidden="true" />
+                      <div className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Costs</div>
+                    </div>
+                    <div className="text-xs">
+                      <div className="inline-flex items-center rounded-md px-2 py-0.5 bg-destructive text-destructive-foreground border border-destructive/50">−${formatNumber(costsTotal, 0, 2)}</div>
+                    </div>
+                  </div>
+                  {/* Costs items */}
+                  <div className="flex items-center justify-between py-1.5">
+                    <LabelWithTooltip
+                      labelClassName="text-sm text-foreground/80"
+                      label="Impermanent Loss (IL)"
+                      tooltipContent={<div className="max-w-[260px] text-xs">Loss from price divergence versus holding tokens.</div>}
+                    />
+                    <span className="text-sm font-medium tabular-nums">−${formatNumber(Math.abs(il), 0, 2)}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1.5">
+                    <LabelWithTooltip
+                      labelClassName="text-sm text-foreground/80"
+                      label="Range/Rebalance effect"
+                      tooltipContent={<div className="max-w-[280px] text-xs">Cost of resetting ranges (gas/swap) and realized IL when repositioning.</div>}
+                    />
+                    <span className="text-sm font-medium tabular-nums">−${formatNumber(Math.abs(range), 0, 2)}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1.5">
+                    <LabelWithTooltip
+                      labelClassName="text-sm text-foreground/80"
+                      label="Performance Fee"
+                      tooltipContent={<div className="max-w-[260px] text-xs">Fee applied only to realized gains.</div>}
+                    />
+                    <span className="text-sm font-medium tabular-nums">−${formatNumber(Math.abs(perf), 0, 2)}</span>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="border-t border-border/50 my-1" />
+
+                  {/* Net */}
+                  <div className="flex items-center justify-between py-2">
+                    <div className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Net P&L</div>
+                    <span
+                      aria-live="polite"
+                      className={cn(
+                        "font-mono tabular-nums text-lg font-semibold",
+                        net >= 0 ? "text-emerald-400" : "text-destructive"
+                      )}
+                    >
+                      {`${net >= 0 ? "+" : "-"}$${formatNumber(Math.abs(net), 0, 2)}`}
+                    </span>
+                  </div>
+
+                  {/* Footer line */}
+                  <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
+                    <span>{pnlPeriod === "deposit" ? "Since deposit" : "Last 24h"}</span>
+                    <button
+                      type="button"
+                      onClick={() => setPnlPeriod("24h")}
+                      className="text-foreground/80 hover:text-foreground underline underline-offset-4 decoration-dotted"
+                    >
+                      What changed since yesterday?
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
       </DetailWrapper>

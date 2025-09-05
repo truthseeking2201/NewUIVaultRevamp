@@ -7,11 +7,16 @@ import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currency";
 import { motion, AnimatePresence } from "framer-motion";
 import { Brain, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
+type TimeRange = '24h' | '7d' | '30d';
 type Props = {
   vault_id: string;
-  timeRange: '24h' | '7d';
+  timeRange: TimeRange;
   filter: Types["type"][];
+  onQuickFilter?: (key: 'inflow' | 'outflow' | 'net' | 'swaps' | 'stoploss' | 'churn') => void;
+  onChangeRange?: (r: TimeRange) => void;
 };
 
 const mapFilterToAction = (filter: Types["type"][]) => {
@@ -22,14 +27,14 @@ const mapFilterToAction = (filter: Types["type"][]) => {
   return "";
 };
 
-export default function ActivitiesInsights({ vault_id, timeRange, filter }: Props) {
+export default function ActivitiesInsights({ vault_id, timeRange, filter, onQuickFilter, onChangeRange }: Props) {
   const [showReasoning, setShowReasoning] = useState(false);
   const { data, isLoading } = useQuery({
     queryKey: ["activities-insights", vault_id, timeRange, filter],
     queryFn: async () => {
       const res = await getVaultsActivities({
         page: 1,
-        limit: 100,
+        limit: 1000,
         action_type: mapFilterToAction(filter),
         time_range: timeRange,
         vault_id,
@@ -92,13 +97,37 @@ export default function ActivitiesInsights({ vault_id, timeRange, filter }: Prop
     const topReason = Object.entries(reasons).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
     const rebalances = (typeCount["OPEN"] || 0) + (typeCount["CLOSE"] || 0);
 
-    // Likely driver heuristic
-    let driver: string | null = null;
-    if (stopLossCount > 0) driver = 'Protective exit after drawdown.';
-    else if (rebalances >= 6) driver = 'High churn from narrow range.';
-    else if (topReason && /deviation|drift|recenter/i.test(topReason)) driver = 'Inventory drift after deviation.';
+    // Driver scoring (rule-based)
+    const hasReason = (k: RegExp) => (topReason ? k.test(topReason) : false) ? 1 : 0;
+    const zSwap = swapVol > 0 ? Math.min(1, Math.log10(1 + swapVol) / 6) : 0; // soft scale
+    const zReb = rebalances > 0 ? Math.min(1, rebalances / 20) : 0;
+    const narrowScore = zReb + hasReason(/churn|narrow/i);
+    const driftScore = zSwap + hasReason(/deviation|drift|recenter|out of range/i);
+    const protectiveScore = (stopLossCount > 0 ? 1 : 0) + (net < 0 ? 0.3 : 0);
+    const stableScore = 0.2; // baseline fallback
+    const scores = [narrowScore, driftScore, protectiveScore, stableScore];
+    const labels = [
+      "High churn from a narrow range. Many rebalances and low time in range increased costs.",
+      "Inventory drift after a price move. Price moved and the position was rebalanced; fees may not yet cover the loss.",
+      "Protective exit after a drawdown. Stop-loss was triggered to limit further downside.",
+      "Stable period. Few rebalances and healthy time in range; fees should accumulate normally.",
+    ];
+    let maxIdx = 0;
+    for (let i = 1; i < scores.length; i++) if (scores[i] > scores[maxIdx]) maxIdx = i;
+    const sum = scores.reduce((a, b) => a + b, 0) || 1;
+    const confidence = Math.max(0.05, scores[maxIdx] / sum);
+    const driver = labels[maxIdx];
 
-    return { inflow, outflow, net, swapVol, topReason, typeCount, rebalances, stopLossCount, lastStopLossTs, driver };
+    // Next action mapping
+    const nextMap = [
+      "Widen the range to reduce churn and stay in range longer.",
+      "Recenter the position if the price move persists.",
+      "Stay in cooldown and re-evaluate shortly.",
+      "Maintain current position and keep collecting fees.",
+    ];
+    const nextAction = nextMap[maxIdx];
+
+    return { inflow, outflow, net, swapVol, topReason, typeCount, rebalances, stopLossCount, lastStopLossTs, driver, nextAction, confidence };
   }, [data]);
 
   return (
@@ -109,15 +138,24 @@ export default function ActivitiesInsights({ vault_id, timeRange, filter }: Prop
       aiEnhanced
       aiTag="AI Insights"
       title="AI Insights"
-      subtitle={timeRange === '24h' ? 'Analyzing last 24 hours' : 'Analyzing last 7 days'}
+      subtitle={(timeRange === '24h' ? 'Last 24h' : timeRange === '7d' ? 'Last 7d' : 'Last 30d')}
       headerAction={
-        <button
-          onClick={() => setShowReasoning((s) => !s)}
-          className="text-[12px] text-white/80 hover:text-white flex items-center gap-1"
-        >
-          {showReasoning ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          {showReasoning ? 'Hide explanation' : 'Explain'}
-        </button>
+        <div className="flex items-center gap-2">
+          {(["24h","7d","30d"] as TimeRange[]).map((r) => (
+            <button
+              key={r}
+              onClick={() => onChangeRange?.(r)}
+              className={cn(
+                "px-2 h-7 rounded-md border text-xs",
+                r === timeRange ? "bg-white/10 border-white/20 text-white" : "bg-white/5 border-white/10 text-white/80 hover:text-white"
+              )}
+            >{r === '24h' ? 'Last 24h' : r === '7d' ? 'Last 7d' : 'Last 30d'}</button>
+          ))}
+          <button onClick={() => setShowReasoning((s) => !s)} className="text-[12px] text-white/80 hover:text-white flex items-center gap-1">
+            {showReasoning ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            {showReasoning ? 'Hide details' : 'Why this insight?'}
+          </button>
+        </div>
       }
       collapsible={false}
       loading={isLoading}
@@ -125,44 +163,91 @@ export default function ActivitiesInsights({ vault_id, timeRange, filter }: Prop
       <AICardContent className="pt-2">
         {insights ? (
           <div className="flex flex-col gap-3">
-            {/* AI summary line */}
-            <div className="flex items-center gap-2 text-sm text-white/90">
-              <Brain size={16} className="text-nova" />
-              <span>
-                AI summary: <span className="font-medium">{insights.net >= 0 ? 'Net inflow' : 'Net outflow'}</span> {formatCurrency(Math.abs(insights.net), 0, 0, 2, 'currency', 'USD')} ({timeRange}).
-              </span>
+            {/* Summary row */}
+            <TooltipProvider delayDuration={0}>
+              <div className="text-sm text-white/90 font-mono flex flex-wrap gap-x-3 gap-y-1">
+                <span>Summary:</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="underline underline-offset-4 decoration-dotted cursor-help">In {formatCurrency(insights.inflow, 0, 0, 0, 'currency', 'USD')}</span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">Money added through Add Liquidity in this period.</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="underline underline-offset-4 decoration-dotted cursor-help">Out {formatCurrency(insights.outflow, 0, 0, 0, 'currency', 'USD')}</span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">Money withdrawn through Remove Liquidity in this period.</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="underline underline-offset-4 decoration-dotted cursor-help">Net {insights.net >= 0 ? '+' : '−'}{formatCurrency(Math.abs(insights.net), 0, 0, 0, 'currency', 'USD')}</span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">Difference between money added and withdrawn.</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="underline underline-offset-4 decoration-dotted cursor-help">Swaps {formatCurrency(insights.swapVol, 0, 0, 0, 'currency', 'USD')}</span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">Total value of token swaps used to adjust the position.</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="underline underline-offset-4 decoration-dotted cursor-help">Churn {insights.rebalances}</span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">Number of times the position was reset; high churn can increase costs.</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="underline underline-offset-4 decoration-dotted cursor-help">In-range —</span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">Average time the position stayed in the fee-earning zone.</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="underline underline-offset-4 decoration-dotted cursor-help">Stop-loss {insights.stopLossCount || 0}{insights.lastStopLossTs ? ` (${new Date(insights.lastStopLossTs).toTimeString().slice(0,5)})` : ''}</span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">Protective exits that lock in a loss to avoid bigger losses.</TooltipContent>
+                </Tooltip>
+              </div>
+            </TooltipProvider>
+
+            {/* Driver + Next action */}
+            <div className="text-white/80 text-sm">
+              <div className="mb-1">What this means: <span className="text-white/90">{insights.driver}</span></div>
+              <div className="flex items-center gap-2">
+                <span>What AI will likely do next: <span className="text-white/90">{insights.nextAction}</span></span>
+                <span className="px-2 py-0.5 rounded-md border border-white/10 bg-white/5 text-xs">
+                  {confidenceText(insights.confidence)} {confidenceMeter(insights.confidence)}
+                </span>
+              </div>
             </div>
 
-            {/* Stat badges */}
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-2 text-sm">
-              <AICardInsightBadge type={insights.net >= 0 ? 'success' : 'alert'}>
-                Net {insights.net >= 0 ? 'inflow' : 'outflow'} {formatCurrency(Math.abs(insights.net), 0, 0, 2, 'currency', 'USD')}
-              </AICardInsightBadge>
-              <div className="px-2 py-1 rounded-md bg-white/5 border border-white/10 text-white/80">
-                Inflow: <span className="text-white">{formatCurrency(insights.inflow, 0, 0, 2, 'currency', 'USD')}</span>
-              </div>
-              <div className="px-2 py-1 rounded-md bg-white/5 border border-white/10 text-white/80">
-                Outflow: <span className="text-white">{formatCurrency(insights.outflow, 0, 0, 2, 'currency', 'USD')}</span>
-              </div>
-              <div className="px-2 py-1 rounded-md bg-white/5 border border-white/10 text-white/80">
-                Swaps: <span className="text-white">{formatCurrency(insights.swapVol, 0, 0, 2, 'currency', 'USD')}</span>
-              </div>
-              <div className="px-2 py-1 rounded-md bg-white/5 border border-white/10 text-white/80">
-                Churn: <span className="text-white">{insights.rebalances}</span>
-              </div>
-              <div className="px-2 py-1 rounded-md bg-white/5 border border-white/10 text-white/80">
-                In-range (24h): <span className="text-white">—</span>
-              </div>
-            </div>
-
-            {/* Trend reason */}
-            <div className="text-white/70 italic truncate max-w-full">
-              {insights.driver ? (
-                <>Likely driver: “{insights.driver}”</>
-              ) : (
-                insights.topReason ? <>Likely driver: “{insights.topReason}”</> : null
+            {/* How we read this (collapsed by default) */}
+            <AnimatePresence initial={false}>
+              {showReasoning && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <Accordion type="single" collapsible value={showReasoning ? 'ai-read' : ''} onValueChange={(v) => setShowReasoning(v === 'ai-read')}>
+                    <AccordionItem value="ai-read">
+                      <AccordionTrigger className="!pt-0 text-sm font-medium">How we read this</AccordionTrigger>
+                      <AccordionContent className="text-sm text-white/80">
+                        <ul className="list-disc pl-4 space-y-1 tabular-nums">
+                          <li>Data we checked: {timeRange} adds, removes, swaps, rebalances, stop-loss.</li>
+                          <li>What changed: {changeSummary(insights.inflow, insights.outflow, insights.swapVol, insights.rebalances)}</li>
+                          <li>What it means: {insights.driver}</li>
+                          <li>What AI will likely do next: {insights.nextAction} <span className="ml-1 text-white/70">{confidenceText(insights.confidence)} {confidenceMeter(insights.confidence)}</span></li>
+                        </ul>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </motion.div>
               )}
-            </div>
+            </AnimatePresence>
 
             <AnimatePresence initial={false}>
               {showReasoning && (
@@ -213,7 +298,7 @@ export default function ActivitiesInsights({ vault_id, timeRange, filter }: Prop
             </AnimatePresence>
           </div>
         ) : (
-          <div className="text-white/60 text-sm">No recent data to analyze</div>
+          <div className="text-white/60 text-sm">No activity in the selected period.</div>
         )}
       </AICardContent>
     </AICard>
@@ -237,4 +322,14 @@ function Chip({ label, value, color }: { label: string; value: number; color: "e
       <span className="font-mono">{value}</span>
     </div>
   );
+}
+
+function confidenceText(v: number): string {
+  if (v <= 0.33) return 'Confidence: Low';
+  if (v <= 0.66) return 'Confidence: Medium';
+  return 'Confidence: High';
+}
+function confidenceMeter(v: number): string {
+  const filled = Math.max(1, Math.min(5, Math.round(v * 5)));
+  return ' ' + '▮'.repeat(filled) + '▯'.repeat(5 - filled);
 }

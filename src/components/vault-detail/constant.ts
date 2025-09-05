@@ -41,6 +41,7 @@ export const SWAP_TYPES = ["SWAP"];
 export const ACTIVITIES_TIME_TABS = [
   { value: "24h", label: "Last 24h" },
   { value: "7d", label: "Last 7d" },
+  { value: "30d", label: "Last 30d" },
 ];
 
 // Lightweight mock series for UserPosition chart (NDLP vs Break-even zones)

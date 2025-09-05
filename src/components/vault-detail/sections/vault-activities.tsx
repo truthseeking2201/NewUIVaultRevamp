@@ -28,7 +28,7 @@ const VaultActivities = ({
   vault_id,
 }: VaultActivitiesProps) => {
   const [filter, setFilter] = useState<Types["type"][]>(["ALL"]);
-  const [timeRange, setTimeRange] = useState<'24h' | '7d'>('24h');
+  const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d'>('24h');
   const [currentPage, setCurrentPage] = useState(1);
   const [lastTotalPages, setLastTotalPages] = useState(1);
 
@@ -72,7 +72,6 @@ const VaultActivities = ({
         page: currentPage,
         limit: ITEMS_PER_PAGE,
         action_type: handleFormatFilter(filter),
-        // @ts-ignore time_range used by mocks
         time_range: timeRange,
         vault_id,
       }),
@@ -180,7 +179,7 @@ const VaultActivities = ({
           </Tabs>
           <Tabs
             value={timeRange}
-            onValueChange={(value) => setTimeRange(value as '24h' | '7d')}
+            onValueChange={(value) => setTimeRange(value as '24h' | '7d' | '30d')}
           >
             <TabsList className="p-1 flex gap-1 overflow-x-auto no-scrollbar max-w-full">
               {ACTIVITIES_TIME_TABS.map((tab, index) => (
@@ -196,7 +195,33 @@ const VaultActivities = ({
       loadingStyle="h-[447px] w-full"
     >
       {/* AI Insights: subtle summary of recent activity */}
-      <ActivitiesInsights vault_id={vault_id} timeRange={timeRange} filter={filter} />
+      <ActivitiesInsights
+        vault_id={vault_id}
+        timeRange={timeRange as any}
+        filter={filter}
+        onQuickFilter={(key) => {
+          const map: Record<string, Types["type"]> = {
+            inflow: "ADD_LIQUIDITY",
+            outflow: "REMOVE_LIQUIDITY",
+            net: "ALL",
+            swaps: "SWAP",
+            stoploss: "REMOVE_LIQUIDITY",
+            churn: "OPEN",
+          };
+          const t = map[key] || "ALL";
+          handleFilterChange([t]);
+          try {
+            const url = new URL(window.location.href);
+            url.searchParams.set('insightFilter', key);
+            window.history.replaceState({}, '', `${url.pathname}${url.search}`);
+            // Scroll table into view
+            const el = document.querySelector('[data-activities-root]') as HTMLElement | null;
+            el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } catch {}
+        }}
+        onChangeRange={(r) => setTimeRange(r as any)}
+      />
+      <div data-activities-root />
       {isMobile ? (
         <MobileList
           paginatedTransactions={paginatedTransactions}
