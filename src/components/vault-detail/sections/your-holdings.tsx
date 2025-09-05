@@ -24,8 +24,7 @@ import { calculateUserHoldings } from "@/utils/helpers";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import ConditionRenderer from "@/components/shared/condition-renderer";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useEstimateWithdraw, useEstimateWithdrawDual, useLpBreakdown } from "@/hooks/use-vault";
+import { useLpBreakdown } from "@/hooks/use-vault";
 import { format } from "date-fns";
 import NdLpStatusChartCard from "@/components/vault-detail/sections/ndlp-status-chart-card";
 import { tokenIconPath } from "@/components/vault-detail/activities/utils";
@@ -770,30 +769,7 @@ export function MyPositionSection({
   const perfFeeUsd = Math.max(0, (fixture?.attribution?.performanceFeeUSD ?? (pnl > 0 ? pnl * perfRate : 0)));
   const netPnl = (fixture?.attribution?.netPnlUSD ?? pnl - perfFeeUsd);
 
-  const [openExit, setOpenExit] = useState(false);
   const [pnlPeriod, setPnlPeriod] = useState<"deposit" | "24h">("deposit");
-  const [payoutToken, setPayoutToken] = useState<string>((vault?.tokens?.[0]?.token_address as string) || "");
-  const payoutTokenSymbol = useMemo(() => {
-    const t = vault?.tokens?.find((t) => t.token_address === payoutToken);
-    return t?.token_symbol || "Token";
-  }, [payoutToken, vault?.tokens]);
-
-  const { data: estSingle } = useEstimateWithdraw(vault_id, { ndlp_amount: ndlp_balance, payout_token: payoutToken });
-  const { data: estDual } = useEstimateWithdrawDual(vault_id, ndlp_balance, !!ndlp_balance);
-  const exitAsOf = fixture?.exitEstimate?.asOf ?? new Date().toISOString();
-  const exitText = (() => {
-    if (estSingle?.estimate_receive_amount) {
-      return `${formatNumber(Number(estSingle.estimate_receive_amount), 0, 4)} ${payoutTokenSymbol}`;
-    }
-    if (estDual?.receive_tokens?.length) {
-      return estDual.receive_tokens.map((x) => `${formatNumber(Number(x.receive_amount), 0, 4)} ${x.symbol}`).join(" + ");
-    }
-    if (fixture?.exitEstimate) {
-      const ex = fixture.exitEstimate;
-      return `${formatNumber(ex.estimatedTokens, 0, 4)} ${ex.payoutToken}`;
-    }
-    return "—";
-  })();
 
   return (
     <div className="flex flex-col gap-4">
@@ -815,46 +791,7 @@ export function MyPositionSection({
         )}
       </DetailWrapper>
 
-      <DetailWrapper title="Exit Simulation (Estimate)" isLoading={!!isDetailLoading} loadingStyle="h-[100px] w-full">
-        {!showData ? (
-          <div className="text-white/70 text-sm">Connect your wallet to run exit estimates.</div>
-        ) : (
-          <div>
-            <div className="flex items-center justify-between">
-              <div className="text-white/70 text-sm">Simulate exiting with your current NDLP balance.</div>
-              <Button variant="outline" size="sm" onClick={() => setOpenExit((v) => !v)}>
-                {openExit ? "Collapse" : "Expand"}
-              </Button>
-            </div>
-            {openExit && (
-              <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="col-span-1">
-                  <LabelWithTooltip label="Payout Token" labelClassName="text-white/60 text-xs mb-1" tooltipContent={<div className="text-xs text-white/70">Select the token to receive when exiting.</div>} />
-                  <Select value={payoutToken} onValueChange={(v) => setPayoutToken(v)}>
-                    <SelectTrigger className="w-full"><SelectValue placeholder="Select token" /></SelectTrigger>
-                    <SelectContent>
-                      {vault?.tokens?.map((t) => (
-                        <SelectItem key={t.token_address} value={t.token_address}>{t.token_symbol}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="col-span-1">
-                  <LabelWithTooltip label="Estimated Receive" labelClassName="text-white/60 text-xs mb-1" />
-                  <div className="text-white font-mono">{exitText}</div>
-                  <div className="text-white/60 text-xs mt-1">
-                    As of {format(new Date(exitAsOf), "yyyy-MM-dd HH:mm:ss")} — Estimate only. Final amount is confirmed in the Withdraw step and may change with price or fees.
-                  </div>
-                </div>
-                <div className="col-span-1">
-                  <LabelWithTooltip label="PnL if Exit Now" labelClassName="text-white/60 text-xs mb-1" />
-                  <div className={cn("font-mono", pnl >= 0 ? "text-emerald-400" : "text-red-400")}>{`${pnl >= 0 ? "+" : "-"}$${formatNumber(Math.abs(pnl), 0, 2)}`}</div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </DetailWrapper>
+      {/* Exit Simulation (Estimate) card removed as requested */}
 
       <DetailWrapper id="pnl-card" title="P&L Breakdown" isLoading={!!isDetailLoading} loadingStyle="h-[120px] w-full"
         titleComponent={
@@ -895,14 +832,28 @@ export function MyPositionSection({
               {pnlPeriod === "deposit" ? "Breakdown since your first deposit" : "Change in the last 24 hours"}
             </div>
             {(() => {
-              // pick values per view
-              const dep = fixture?.attribution;
-              const d24 = fixture?.pnl24h;
-              const gains = pnlPeriod === "deposit" ? (dep?.feesAutoCompUSD ?? 0) : (d24?.feesAutoCompUSD ?? fixture?.yield?.fees24hUSD ?? 0);
-              const il = pnlPeriod === "deposit" ? (dep?.impermanentLossUSD ?? 0) : (d24?.impermanentLossUSD ?? 0);
-              const range = pnlPeriod === "deposit" ? (dep?.rangeRebalanceEffectUSD ?? 0) : (d24?.rangeRebalanceEffectUSD ?? 0);
-              const perf = pnlPeriod === "deposit" ? (dep?.performanceFeeUSD ?? 0) : (d24?.performanceFeeUSD ?? 0);
-              const net = pnlPeriod === "deposit" ? (dep?.netPnlUSD ?? 0) : (d24?.netPnlUSD ?? 0);
+              // Fallback mock values to ensure illustrative numbers even when authenticated
+              const defaultAttribution = {
+                feesAutoCompUSD: 248.0,
+                impermanentLossUSD: -173.0,
+                rangeRebalanceEffectUSD: -51.0,
+                performanceFeeUSD: -8.0,
+                netPnlUSD: 16.0,
+              };
+              const default24h = {
+                feesAutoCompUSD: 1.28,
+                impermanentLossUSD: -0.92,
+                rangeRebalanceEffectUSD: -0.18,
+                performanceFeeUSD: -0.0,
+                netPnlUSD: 0.18,
+              };
+              const dep = fixture?.attribution ?? defaultAttribution;
+              const d24 = fixture?.pnl24h ?? default24h;
+              const gains = pnlPeriod === "deposit" ? (dep.feesAutoCompUSD ?? 0) : (d24.feesAutoCompUSD ?? fixture?.yield?.fees24hUSD ?? 0);
+              const il = pnlPeriod === "deposit" ? (dep.impermanentLossUSD ?? 0) : (d24.impermanentLossUSD ?? 0);
+              const range = pnlPeriod === "deposit" ? (dep.rangeRebalanceEffectUSD ?? 0) : (d24.rangeRebalanceEffectUSD ?? 0);
+              const perf = pnlPeriod === "deposit" ? (dep.performanceFeeUSD ?? 0) : (d24.performanceFeeUSD ?? 0);
+              const net = pnlPeriod === "deposit" ? (dep.netPnlUSD ?? 0) : (d24.netPnlUSD ?? 0);
               const gainsTotal = gains;
               const costsTotal = Math.abs(il) + Math.abs(range) + Math.abs(perf);
               return (

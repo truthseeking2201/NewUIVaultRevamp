@@ -38,6 +38,7 @@ const VaultActivities = ({
       limit = 5,
       action_type = "",
       vault_id = "",
+      time_range = "",
     }: {
       page?: number;
       limit?: number;
@@ -51,6 +52,7 @@ const VaultActivities = ({
           limit,
           action_type,
           vault_id,
+          time_range,
         });
 
         if (response) {

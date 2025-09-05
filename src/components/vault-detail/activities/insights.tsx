@@ -171,13 +171,13 @@ export default function ActivitiesInsights({ vault_id, timeRange, filter, onQuic
                   <TooltipTrigger asChild>
                     <span className="underline underline-offset-4 decoration-dotted cursor-help">In {formatCurrency(insights.inflow, 0, 0, 0, 'currency', 'USD')}</span>
                   </TooltipTrigger>
-                  <TooltipContent side="top">Money added through Add Liquidity in this period.</TooltipContent>
+                  <TooltipContent side="top">Money added to the vault in this period.</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="underline underline-offset-4 decoration-dotted cursor-help">Out {formatCurrency(insights.outflow, 0, 0, 0, 'currency', 'USD')}</span>
                   </TooltipTrigger>
-                  <TooltipContent side="top">Money withdrawn through Remove Liquidity in this period.</TooltipContent>
+                  <TooltipContent side="top">Money withdrawn from the vault in this period.</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -189,13 +189,13 @@ export default function ActivitiesInsights({ vault_id, timeRange, filter, onQuic
                   <TooltipTrigger asChild>
                     <span className="underline underline-offset-4 decoration-dotted cursor-help">Swaps {formatCurrency(insights.swapVol, 0, 0, 0, 'currency', 'USD')}</span>
                   </TooltipTrigger>
-                  <TooltipContent side="top">Total value of token swaps used to adjust the position.</TooltipContent>
+                  <TooltipContent side="top">Value of token swaps used to adjust the position.</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="underline underline-offset-4 decoration-dotted cursor-help">Churn {insights.rebalances}</span>
                   </TooltipTrigger>
-                  <TooltipContent side="top">Number of times the position was reset; high churn can increase costs.</TooltipContent>
+                  <TooltipContent side="top">How many times the position was reset. High churn can increase costs.</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
