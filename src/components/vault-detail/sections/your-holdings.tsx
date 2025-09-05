@@ -1,6 +1,6 @@
 import { DetailWrapper } from "@/components/vault-detail/detail-wrapper";
 import { ReactNode, useEffect, useMemo, useState } from "react";
-import { PieChart, Pie, Cell, Tooltip as RechartsTooltip } from "recharts";
+import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -29,6 +29,7 @@ import { format } from "date-fns";
 import NdLpStatusChartCard from "@/components/vault-detail/sections/ndlp-status-chart-card";
 import { tokenIconPath } from "@/components/vault-detail/activities/utils";
 import { ChartTooltip } from "@/components/chart/ChartTooltip";
+import { Separator } from "@/components/ui/separator";
 
 type YourHoldingProps = {
   isDetailLoading: boolean;
@@ -433,7 +434,7 @@ const YourHoldings = ({
                     }
                     labelClassName="text-white/60 md:text-xs text-[10px] mb-1 underline underline-offset-4 decoration-dotted decoration-gray-600"
                   />
-                  <div className="font-mono text-white md:text-xl text-sm">
+                  <div className="font-mono text-white md:text-3xl text-xl font-semibold tracking-tight tabular-nums">
                     {userHoldingData?.user_ndlp_balance && authEnabled
                       ? formatNumber(
                           userHoldingData?.user_ndlp_balance,
@@ -548,7 +549,7 @@ const YourHoldings = ({
                     }
                     labelClassName="text-white/80 text-xs mb-1 underline underline-offset-4 decoration-dotted decoration-gray-600"
                   />
-                  <span className="flex-1 border-b border-dashed border-[#505050] mx-2"></span>
+                  <span className="flex-1 border-b border-dashed border-[rgba(255,255,255,0.20)] mx-2"></span>
                   <span className="font-mono">
                     $
                     {authEnabled
@@ -571,7 +572,7 @@ const YourHoldings = ({
                     }
                     labelClassName="text-white/80 text-xs mb-1 underline underline-offset-4 decoration-dotted decoration-gray-600"
                   />
-                  <span className="flex-1 border-b border-dashed border-[#505050] mx-2"></span>
+                  <span className="flex-1 border-b border-dashed border-[rgba(255,255,255,0.20)] mx-2"></span>
                   <span className="font-mono">
                     $
                     {authEnabled
@@ -598,7 +599,7 @@ const YourHoldings = ({
                     }
                     labelClassName="text-white/80 text-xs mb-1 underline underline-offset-4 decoration-dotted decoration-gray-600"
                   />
-                  <span className="flex-1 border-b border-dashed border-[#505050] mx-2"></span>
+                  <span className="flex-1 border-b border-dashed border-[rgba(255,255,255,0.20)] mx-2"></span>
                   <span className="font-mono">
                     {authEnabled ? (
                       userHoldingData?.user_rewards_24h_usd > 0 ? (
@@ -632,7 +633,7 @@ const YourHoldings = ({
                     }
                     labelClassName="text-white/80 text-xs mb-1 underline underline-offset-4 decoration-dotted decoration-gray-600"
                   />
-                  <span className="flex-1 border-b border-dashed border-[#505050] mx-2"></span>
+                  <span className="flex-1 border-b border-dashed border-[rgba(255,255,255,0.20)] mx-2"></span>
                   <span className="font-mono">
                     {authEnabled
                       ? formatNumber(
@@ -657,7 +658,7 @@ const YourHoldings = ({
                     }
                     labelClassName="text-white/80 text-xs font-sans underline underline-offset-4 decoration-dotted decoration-gray-600"
                   />
-                  <span className="flex-1 border-b border-dashed border-[#505050] mx-2"></span>
+                  <span className="flex-1 border-b border-dashed border-[rgba(255,255,255,0.20)] mx-2"></span>
                   <span className="font-mono">
                     $
                     {authEnabled
@@ -772,25 +773,48 @@ export function MyPositionSection({
 
   const [pnlPeriod, setPnlPeriod] = useState<"deposit" | "24h">("deposit");
 
+  // Fallback slices for LP Breakdown when secure snapshot isn't available
+  const fallbackLpSlices = useMemo(() => {
+    try {
+      const tokens = (holding as any)?.user_vault_tokens || [];
+      const total = tokens.reduce((s: number, t: any) => s + (t.amount_in_usd || 0), 0);
+      if (!total) return [] as { label: string; percent: number; usd: number }[];
+      return tokens.map((t: any) => ({
+        label: t.token_symbol || t.token_name || "",
+        percent: Number((((t.amount_in_usd || 0) / total) * 100).toFixed(1)),
+        usd: Number(t.amount_in_usd || 0),
+      }));
+    } catch {
+      return [] as { label: string; percent: number; usd: number }[];
+    }
+  }, [holding]);
+
   return (
     <div className="flex flex-col gap-4">
-      {/* Your Position Status (NDLP vs Break-even) */}
-      <NdLpStatusChartCard />
+      {/* My Balance first */}
       <DetailWrapper title="My Balance" isLoading={!!isDetailLoading} loadingStyle="h-[80px] w-full">
         {!showData ? (
           <div className="text-white/70 text-sm">Connect wallet to view your position.</div>
         ) : (
           <div className="flex flex-col gap-1">
+            {/* Totals on top */}
+            <div className="flex items-center justify-between text-sm"><span className="text-white/60">Total Deposits</span><span className="font-mono text-white">${formatNumber(fixture?.cashflow?.totalDepositsUSD ?? totalDeposit, 0, 2)}</span></div>
+            <div className="flex items-center justify-between text-sm"><span className="text-white/60">Total Withdrawals</span><span className="font-mono text-white">${formatNumber(Number((fixture?.cashflow?.totalWithdrawalsUSD ?? (holding as any)?.user_total_withdraw_usd) || 0), 0, 2)}</span></div>
+            <Separator className="my-3 md:my-4 h-px rounded-full bg-foreground/20" role="presentation" aria-hidden />
+            {/* Rest of balances */}
+            <div className="flex items-center justify-between text-sm"><span className="text-white/60">My NDLP Balance</span><span className="font-mono text-white">{formatNumber(ndlpBalance, 0, 4)} NDLP</span></div>
             <div className="flex items-center justify-between text-sm"><span className="text-white/60">Current Value (USD)</span><span className="font-mono text-white">${formatNumber(currentValue, 0, 2)}</span></div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-white/60">Since Deposit (PnL)</span>
               <span className={cn("font-mono", pnl >= 0 ? "text-emerald-400" : "text-red-400")}>{`${pnl >= 0 ? "+" : "-"}$${formatNumber(Math.abs(pnl), 0, 2)} (${pnlPct >= 0 ? "+" : "-"}${formatNumber(Math.abs(pnlPct) * 100, 0, 2)}%)`}</span>
             </div>
-            <div className="flex items-center justify-between text-sm"><span className="text-white/60">NDLP Balance</span><span className="font-mono text-white">{formatNumber(ndlpBalance, 0, 4)} NDLP @ ${formatNumber(ndlpPrice, 0, 4)}</span></div>
+            <div className="flex items-center justify-between text-sm"><span className="text-white/60">Current NDLP Price</span><span className="font-mono text-white">${formatNumber(ndlpPrice, 0, 4)} / NDLP</span></div>
             <div className="flex items-center justify-between text-sm"><span className="text-white/60">Break-even Price</span><span className="font-mono text-white">${formatNumber(breakEven, 0, 4)} / NDLP</span></div>
           </div>
         )}
       </DetailWrapper>
+      {/* Your Position Status (NDLP vs Break-even) */}
+      <NdLpStatusChartCard />
 
       {/* Exit Simulation (Estimate) card removed as requested */}
 
@@ -880,7 +904,7 @@ export function MyPositionSection({
                   </div>
 
                   {/* Divider */}
-                  <div className="border-t border-border/50 my-1" />
+                  <div className="border-t border-[rgba(255,255,255,0.20)] my-1" />
 
                   {/* Costs header */}
                   <div role="rowheader" className="flex items-center justify-between py-2">
@@ -919,7 +943,7 @@ export function MyPositionSection({
                   </div>
 
                   {/* Divider */}
-                  <div className="border-t border-border/50 my-1" />
+                  <div className="border-t border-[rgba(255,255,255,0.20)] my-1" />
 
                   {/* Net */}
                   <div className="flex items-center justify-between py-2">
@@ -954,45 +978,61 @@ export function MyPositionSection({
       </DetailWrapper>
 
       <DetailWrapper title="Risk & Strategy State" isLoading={!!isDetailLoading} loadingStyle="h-[80px] w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 text-sm">
-          <div className="lg:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2">
-            <MPStateItem label="Stop-loss State" value={`${fixture?.risk?.stopLossState ?? (vault?.is_active ? "Active" : "Inactive")}${fixture?.risk?.stopLossLastTs ? ` (last: ${format(new Date(fixture?.risk?.stopLossLastTs), 'yyyy-MM-dd HH:mm')} )` : ''}`} />
-            <MPStateItem label="% In-range (24h)" value={`${fixture?.risk?.inRangePct24h ?? '—'}${fixture?.risk ? '%' : ''}`} />
-            <MPStateItem label="Rebalances (24h)" value={`${fixture?.risk?.rebalances24h ?? '—'}`} />
-            <MPStateItem label="Exposure" value={`${fixture?.risk?.exposure?.USDC ?? 0}% USDC / ${fixture?.risk?.exposure?.SUI ?? 0}% SUI`} />
-            <MPStateItem label="Share in Vault" value={`${formatNumber((fixture?.risk?.shareInVaultPct ?? (userShare * 100)), 0, 2)}%`} />
-            <MPStateItem label="Range Health" value={`OK`} />
+        <div className="grid grid-cols-12 gap-4">
+          <div className="col-span-12 lg:col-span-8 grid grid-cols-2 md:grid-cols-3 gap-3">
+            {(() => {
+              const state = `${fixture?.risk?.stopLossState ?? (vault?.is_active ? 'Active' : 'Inactive')}`;
+              const last = fixture?.risk?.stopLossLastTs ? format(new Date(fixture?.risk?.stopLossLastTs), 'yyyy-MM-dd HH:mm') : null;
+              const value = last ? `${state} · ${last}` : state;
+              return (
+                <RSStatCard
+                  label="Stop-loss State"
+                  value={value}
+                  tooltip={
+                    <>Protective repositioning when price exits safety thresholds. {last ? <>Last triggered at {last}.</> : <>No recent triggers.</>}</>
+                  }
+                />
+              );
+            })()}
+            <RSStatCard
+              label="In-range (24h)"
+              value={`${fixture?.risk?.inRangePct24h ?? '—'}${fixture?.risk ? '%' : ''}`}
+              tooltip={
+                <>Time-in-range over the last 24 hours (higher implies better fee capture). Current: {fixture?.risk?.inRangePct24h ?? '—'}%.</>
+              }
+            />
+            <RSStatCard
+              label="Rebalances (24h)"
+              value={`${fixture?.risk?.rebalances24h ?? '—'}`}
+              tooltip={
+                <>Count of range resets/adjustments during the last 24 hours (includes gas/swap costs). Current: {fixture?.risk?.rebalances24h ?? '—'}.</>
+              }
+            />
+            <RSStatCard label="Exposure" value={`${fixture?.risk?.exposure?.USDC ?? 0}% USDC / ${fixture?.risk?.exposure?.SUI ?? 0}% SUI`} />
+            <RSStatCard
+              label="Share in Vault"
+              value={`${formatNumber((fixture?.risk?.shareInVaultPct ?? (userShare * 100)), 0, 2)}%`}
+              tooltip={
+                <>Your fraction of the vault’s total value (TVL). Current: {formatNumber((fixture?.risk?.shareInVaultPct ?? (userShare * 100)), 0, 2)}%.</>
+              }
+            />
+            <RSStatCard
+              label="Range Health"
+              value={`OK`}
+              tooltip={
+                <>Heuristic assessment of range utilization and reset frequency. “OK” indicates healthy in-range time and moderate rebalances.</>
+              }
+            />
           </div>
-          <div className="lg:col-span-1"></div>
-        </div>
-        <div className="mt-3">
-          <EstimatedLpBreakdown vault_id={vault_id} embedded />
+          <div className="col-span-12 lg:col-span-4">
+            <EstimatedLpBreakdown vault_id={vault_id} embedded fallbackSlices={fallbackLpSlices} />
+          </div>
         </div>
       </DetailWrapper>
 
-      <DetailWrapper title="Yield Info" isLoading={!!isDetailLoading} loadingStyle="h-[80px] w-full">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-          <MPStateItem label="24h Fees (your share)" value={`$${formatNumber(Number((fixture?.yield?.fees24hUSD ?? (holding as any)?.user_rewards_24h_usd) || 0), 0, 2)}`} />
-          <MPStateItem label="7D Net APY" value={`${formatNumber(Number((fixture?.yield?.netApy7dPct ?? vault?.vault_apy) || 0), 0, 2)}%`} />
-          <div className="text-white/60 text-xs md:col-span-3 col-span-2">Rewards are auto-compounded into NDLP Price and are not claimable separately.</div>
-        </div>
-      </DetailWrapper>
+      {/* Yield Info card removed per request */}
 
-      <DetailWrapper title="Cashflow" isLoading={!!isDetailLoading} loadingStyle="h-[80px] w-full">
-        {!showData ? (
-          <div className="text-white/70 text-sm">Connect your wallet to view cashflow.</div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm items-end">
-            <MPStateItem label="Total Deposits" value={`$${formatNumber(fixture?.cashflow?.totalDepositsUSD ?? totalDeposit, 0, 2)}`} />
-            <MPStateItem label="Total Withdrawals" value={`$${formatNumber(Number((fixture?.cashflow?.totalWithdrawalsUSD ?? (holding as any)?.user_total_withdraw_usd) || 0), 0, 2)}`} />
-            <div className="md:col-span-2 col-span-2 text-right">
-              <Button variant="outline" size="sm" className="border-white/20" disabled>
-                Export CSV (soon)
-              </Button>
-            </div>
-          </div>
-        )}
-      </DetailWrapper>
+      {/* Cashflow card removed: Totals moved under My Balance */}
     </div>
   );
 }
@@ -1016,11 +1056,36 @@ function MPBreakdownItem({ label, value, hint, emphasize }: { label: string; val
   );
 }
 
-function MPStateItem({ label, value }: { label: string; value: string }) {
+function MPStateItem({ label, value, tooltip }: { label: string; value: string; tooltip?: React.ReactNode }) {
   return (
     <div>
-      <div className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">{label}</div>
+      {tooltip ? (
+        <LabelWithTooltip
+          label={label}
+          labelClassName="text-[11px] uppercase tracking-wide text-muted-foreground mb-1"
+          tooltipContent={<div className="text-xs text-muted-foreground max-w-[280px]">{tooltip}</div>}
+        />
+      ) : (
+        <div className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">{label}</div>
+      )}
       <div className="text-sm font-medium tabular-nums">{value || "—"}</div>
+    </div>
+  );
+}
+
+function RSStatCard({ label, value, tooltip }: { label: string; value: string; tooltip?: React.ReactNode }) {
+  return (
+    <div className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2">
+      {tooltip ? (
+        <LabelWithTooltip
+          label={label}
+          labelClassName="text-xs text-white/60 mb-1"
+          tooltipContent={<div className="text-xs text-muted-foreground max-w-[300px]">{tooltip}</div>}
+        />
+      ) : (
+        <div className="text-xs text-white/60 mb-1">{label}</div>
+      )}
+      <div className="text-white font-mono tabular-nums text-sm md:text-base truncate" title={value}>{value}</div>
     </div>
   );
 }
@@ -1041,7 +1106,17 @@ function mpExposureText(holding: any): string {
   }
 }
 
-function EstimatedLpBreakdown({ vault_id, embedded = false }: { vault_id: string; embedded?: boolean }) {
+type LpSlice = { label: string; percent: number; usd: number; color?: string; lastChangedTs?: string };
+
+function EstimatedLpBreakdown({
+  vault_id,
+  embedded = false,
+  fallbackSlices,
+}: {
+  vault_id: string;
+  embedded?: boolean;
+  fallbackSlices?: LpSlice[];
+}) {
   const { data, isLoading, isDegraded } = useLpBreakdown(vault_id);
   // Interactivity state MUST be declared unconditionally to satisfy React hook rules
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
@@ -1086,7 +1161,11 @@ function EstimatedLpBreakdown({ vault_id, embedded = false }: { vault_id: string
     );
   }
 
-  if (!data || !data.slices?.length) {
+  // If API returns nothing, try fallback slices (from user holding tokens)
+  const apiSlices = data?.slices || [];
+  const hasApiSlices = apiSlices.length > 0;
+  const hasFallback = (fallbackSlices?.length || 0) > 0;
+  if (!hasApiSlices && !hasFallback) {
     return (
       <div className={cn("rounded-lg border border-border/60 bg-card/40 px-4 py-3 md:px-5 md:py-4")}> 
         <div className="text-sm font-semibold">Estimated LP Breakdown <span className="text-muted-foreground">• Secure, updates ~1h</span></div>
@@ -1097,7 +1176,9 @@ function EstimatedLpBreakdown({ vault_id, embedded = false }: { vault_id: string
   }
 
   // Aggregate slices: top 8 by usd, rest as Others
-  const sorted = data.slices.slice().sort((a, b) => (b.usd || 0) - (a.usd || 0));
+  const sorted = (hasApiSlices ? apiSlices : (fallbackSlices as LpSlice[]))
+    .slice()
+    .sort((a, b) => (b.usd || 0) - (a.usd || 0));
   const top = sorted.slice(0, 8);
   const rest = sorted.slice(8);
   const othersUsd = rest.reduce((s, x) => s + (x.usd || 0), 0);
@@ -1168,16 +1249,18 @@ function EstimatedLpBreakdown({ vault_id, embedded = false }: { vault_id: string
   const gap = 3;
 
   return (
-    <div className={cn("rounded-lg border border-border/60 bg-card/40 px-4 py-3 md:px-5 md:py-4")}> 
+    <div className={cn("rounded-lg border border-border/60 bg-card/40 px-4 py-3 md:px-5 md:py-4 overflow-clip")}> 
       <div className="mb-2">
         <div className="text-sm font-semibold">
           Estimated LP Breakdown <span className="text-muted-foreground">• Secure, updates ~1h</span>
         </div>
         <div className="text-xs text-muted-foreground">
-          Secure snapshot, refreshed ~hourly — As of {asOfWithTz(data.asOf)}{isDegraded ? " • showing last secure snapshot" : ""}
+          {hasApiSlices
+            ? <>Secure snapshot, refreshed ~hourly — As of {asOfWithTz(data?.asOf)}{isDegraded ? " • showing last secure snapshot" : ""}</>
+            : <>Based on your current holdings snapshot</>}
         </div>
       </div>
-      <div className="grid md:grid-cols-[minmax(280px,1fr)_minmax(240px,0.9fr)] gap-6 items-center">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(280px,1fr)_minmax(220px,280px)] items-center">
         {/* Legend */}
         <div className="space-y-1.5" role="listbox" aria-label="LP breakdown legend">
           {displaySlices.map((s, i) => (
@@ -1197,7 +1280,7 @@ function EstimatedLpBreakdown({ vault_id, embedded = false }: { vault_id: string
                 }
               }}
               className={cn(
-                "grid grid-cols-[6px_24px_1fr_64px_96px] items-center gap-3 py-2 rounded-md",
+                "grid grid-cols-[6px_20px_1fr_56px_84px] items-center gap-3 py-2 rounded-md",
                 activeIdx === i ? "bg-accent/30" : "hover:bg-accent/30"
               )}
             >
@@ -1210,45 +1293,48 @@ function EstimatedLpBreakdown({ vault_id, embedded = false }: { vault_id: string
           ))}
         </div>
         {/* Donut */}
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center min-w-0">
           <div
-            className="outline-none"
+            className="outline-none mx-auto"
+            style={{ width: 'min(252px, 100%)', height: 'min(252px, 100%)' }}
             tabIndex={0}
             role="group"
             aria-label="LP breakdown donut"
             onKeyDown={onKeyDown}
           >
-            <PieChart width={size} height={size}>
-              <Pie
-                data={displaySlices}
-                cx={cx}
-                cy={cy}
-                innerRadius={innerR}
-                outerRadius={outerR}
-                startAngle={90}
-                endAngle={-270}
-                paddingAngle={gap}
-                isAnimationActive={false}
-                dataKey="percent"
-                onMouseLeave={() => setHoverIdx(null)}
-              >
-                {displaySlices.map((s, idx) => (
-                  <Cell
-                    key={idx}
-                    fill={s.color}
-                    stroke={activeIdx === idx ? "var(--foreground)" : "var(--border)"}
-                    strokeOpacity={activeIdx === idx ? 0.9 : 0.5}
-                    strokeWidth={activeIdx === idx ? 2 : 1}
-                    onMouseEnter={() => setHoverIdx(idx)}
-                    onClick={() => setSelectedIdx(selectedIdx === idx ? null : idx)}
-                    tabIndex={0}
-                    role="img"
-                    aria-label={`${s.label} ${percentText(s.percent)}, $${formatNumber(s.usd, 0, 0)}`}
-                  />
-                ))}
-              </Pie>
-              <RechartsTooltip content={<CustomTooltip />} />
-            </PieChart>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={displaySlices}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius="62%"
+                  outerRadius="80%"
+                  startAngle={90}
+                  endAngle={-270}
+                  paddingAngle={3}
+                  isAnimationActive={false}
+                  dataKey="percent"
+                  onMouseLeave={() => setHoverIdx(null)}
+                >
+                  {displaySlices.map((s, idx) => (
+                    <Cell
+                      key={idx}
+                      fill={s.color}
+                      stroke={activeIdx === idx ? "var(--foreground)" : "var(--border)"}
+                      strokeOpacity={activeIdx === idx ? 0.9 : 0.5}
+                      strokeWidth={activeIdx === idx ? 2 : 1}
+                      onMouseEnter={() => setHoverIdx(idx)}
+                      onClick={() => setSelectedIdx(selectedIdx === idx ? null : idx)}
+                      tabIndex={0}
+                      role="img"
+                      aria-label={`${s.label} ${percentText(s.percent)}, $${formatNumber(s.usd, 0, 0)}`}
+                    />
+                  ))}
+                </Pie>
+                <RechartsTooltip content={<CustomTooltip />} />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>

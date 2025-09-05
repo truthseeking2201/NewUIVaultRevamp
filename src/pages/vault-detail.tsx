@@ -263,7 +263,7 @@ const VaultDetail = () => {
           <Tabs value={currentTab} onValueChange={(v) => setTab(v as any)}>
             <TabsList className="p-1 flex gap-1 overflow-x-auto no-scrollbar">
               <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="activity">AI Activity</TabsTrigger>
+              <TabsTrigger value="activity">Activity</TabsTrigger>
               <TabsTrigger value="position">Your Holdings</TabsTrigger>
             </TabsList>
           </Tabs>

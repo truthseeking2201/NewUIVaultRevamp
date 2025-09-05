@@ -204,7 +204,7 @@ export default function NdLpStatusChartCard() {
             />
 
             {/* 0% dashed line */}
-            <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeDasharray="6 4" strokeOpacity={0.6} />
+            <ReferenceLine y={0} stroke="rgba(255, 255, 255, 0.20)" strokeDasharray="6 4" strokeOpacity={1} />
 
             {/* NDLP line (pct) */}
             <Line
@@ -240,7 +240,7 @@ export default function NdLpStatusChartCard() {
           <span>Vault’s NDLP Price</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-block" style={{ width: 56, height: 0, borderTop: "2px dashed hsl(var(--muted-foreground))", opacity: 0.6 }} />
+          <span className="inline-block" style={{ width: 56, height: 0, borderTop: "2px dashed rgba(255, 255, 255, 0.20)" }} />
           <span>Break-Even Price</span>
         </div>
       </div>
